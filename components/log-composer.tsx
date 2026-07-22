@@ -1,60 +1,94 @@
+import { Link2, ImageIcon, Send } from "lucide-react";
 import { createBuildLog } from "@/app/actions/build-logs";
 import type { Project } from "@/lib/queries";
 
 export function LogComposer({
   projects,
   redirectTo = "/feed",
+  variant = "default",
 }: {
   projects: Project[];
   redirectTo?: string;
+  variant?: "default" | "dashboard";
 }) {
+  const dashboard = variant === "dashboard";
+
   return (
     <form
       action={createBuildLog}
-      className="flex flex-col gap-3 rounded-xl border border-green-500/20 bg-green-500/[0.04] p-5"
+      className={
+        dashboard
+          ? "rounded-xl border border-white/[0.065] bg-black/15 p-3 sm:p-4"
+          : "flex flex-col gap-3 rounded-xl border border-green-500/20 bg-green-500/[0.04] p-5"
+      }
     >
-      <p className="text-sm font-medium text-green-400">Wetin you ship today? 🚢</p>
+      {!dashboard ? (
+        <p className="text-sm font-medium text-green-400">Wetin you ship today? 🚢</p>
+      ) : null}
       <input type="hidden" name="redirect_to" value={redirectTo} />
       <textarea
         name="content"
-        rows={3}
+        rows={dashboard ? 4 : 3}
         required
         maxLength={1000}
-        placeholder="Shipped dark mode, fixed the auth bug, deployed v0.2..."
-        className="w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
+        placeholder="What changed today? Shipped a feature, fixed a bug, learned something..."
+        className={
+          dashboard
+            ? "w-full resize-none bg-transparent px-1 py-1 text-sm leading-6 text-white/75 outline-none placeholder:text-white/20"
+            : "w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
+        }
       />
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={dashboard ? "mt-3 grid gap-2 border-t border-white/[0.06] pt-3 lg:grid-cols-[.8fr_1fr_1fr_auto]" : "flex flex-wrap items-center gap-3"}>
         <select
           name="project_id"
           required
-          className="rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
+          className={
+            dashboard
+              ? "min-w-0 rounded-lg border border-white/[0.08] bg-[#101210] px-3 py-2.5 text-xs text-white/55 outline-none focus:border-green-400/30"
+              : "rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
+          }
           defaultValue={projects.length === 1 ? projects[0].id : ""}
         >
-          <option value="" disabled>
-            Select project…
-          </option>
-          {projects.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
+          <option value="" disabled>Select project…</option>
+          {projects.map((project) => (
+            <option key={project.id} value={project.id}>{project.name}</option>
           ))}
         </select>
-        <input
-          name="link_url"
-          type="url"
-          placeholder="Link (optional)"
-          className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
-        />
-        <input
-          name="image_url"
-          type="url"
-          placeholder="Screenshot URL (optional)"
-          className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
-        />
+        <label className={dashboard ? "flex min-w-0 items-center gap-2 rounded-lg border border-white/[0.08] bg-[#101210] px-3" : "contents"}>
+          {dashboard ? <Link2 className="size-3.5 shrink-0 text-white/20" /> : null}
+          <input
+            name="link_url"
+            type="url"
+            placeholder="Link (optional)"
+            className={
+              dashboard
+                ? "min-w-0 flex-1 bg-transparent py-2.5 text-xs text-white/55 outline-none placeholder:text-white/20"
+                : "min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
+            }
+          />
+        </label>
+        <label className={dashboard ? "flex min-w-0 items-center gap-2 rounded-lg border border-white/[0.08] bg-[#101210] px-3" : "contents"}>
+          {dashboard ? <ImageIcon className="size-3.5 shrink-0 text-white/20" /> : null}
+          <input
+            name="image_url"
+            type="url"
+            placeholder="Screenshot URL"
+            className={
+              dashboard
+                ? "min-w-0 flex-1 bg-transparent py-2.5 text-xs text-white/55 outline-none placeholder:text-white/20"
+                : "min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
+            }
+          />
+        </label>
         <button
           type="submit"
-          className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500"
+          className={
+            dashboard
+              ? "inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-black transition-colors hover:bg-green-100"
+              : "rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500"
+          }
         >
+          {dashboard ? <Send className="size-3.5" /> : null}
           Post log
         </button>
       </div>
