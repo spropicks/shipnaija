@@ -13,6 +13,7 @@ export async function SiteHeader() {
         <Link href="/feed" className="hover:text-green-400">Feed</Link>
         <Link href="/projects" className="hover:text-green-400">Projects</Link>
         <Link href="/builders" className="hover:text-green-400">Builders</Link>
+        <Link href="/trending" className="hover:text-green-400">Trending</Link>
         <Link href="/challenges" className="hover:text-green-400">Challenges</Link>
         <SignedOut>
           <SignInButton mode="modal">
