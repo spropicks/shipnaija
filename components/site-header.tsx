@@ -25,6 +25,11 @@ export async function SiteHeader() {
             {l.label}
           </Link>
         ))}
+        <SignedIn>
+          <Link href="/dashboard" className="hover:text-green-400">
+            Dashboard
+          </Link>
+        </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
             <button className="rounded-md bg-green-600 px-3 py-1.5 font-medium text-white hover:bg-green-500">
@@ -78,6 +83,12 @@ export async function SiteHeader() {
               </Link>
             ))}
             <SignedIn>
+              <Link
+                href="/dashboard"
+                className="rounded-lg px-3 py-2 hover:bg-white/5 hover:text-green-400"
+              >
+                Dashboard
+              </Link>
               {profile ? (
                 <Link
                   href={`/builders/${profile.handle}`}
