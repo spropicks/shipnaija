@@ -6,6 +6,8 @@ export const dynamic = "force-dynamic";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
+export const metadata = { title: "Trending" };
+
 export default async function TrendingPage() {
   const { builders, projects } = await getTrending();
 

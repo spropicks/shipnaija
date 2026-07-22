@@ -11,6 +11,8 @@ function fmtRange(startsAt: string, endsAt: string): string {
   ).toLocaleDateString("en-NG", opts)}`;
 }
 
+export const metadata = { title: "Challenges" };
+
 export default async function ChallengesPage() {
   const [active, all] = await Promise.all([getActiveChallenge(), listChallenges()]);
   const past = all.filter((c) => c.id !== active?.id);

@@ -4,6 +4,8 @@ import { listProjects } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Projects" };
+
 export default async function ProjectsPage() {
   const projects = await listProjects();
   return (

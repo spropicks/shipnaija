@@ -4,6 +4,8 @@ import { listBuilders } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Builders" };
+
 export default async function BuildersPage() {
   const builders = await listBuilders();
   return (

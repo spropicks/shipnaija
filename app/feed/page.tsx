@@ -8,6 +8,8 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Feed" };
+
 export default async function FeedPage() {
   const me = await getCurrentProfile();
   const [logs, myProjects] = await Promise.all([
