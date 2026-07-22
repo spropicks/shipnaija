@@ -1,28 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --brand: #16a34a; /* Naija green */
+  --background: #080908;
+  --foreground: #f0f2f0;
+  --brand: #22c55e;
 }
 
 html {
   scroll-behavior: smooth;
+  background: var(--background);
 }
 
 body {
-  background: var(--background);
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(34, 197, 94, 0.045), transparent 34%),
+    var(--background);
   color: var(--foreground);
-  font-feature-settings: "cv11", "ss01";
+  font-feature-settings: "cv11", "ss01", "ss03";
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: rgba(22, 163, 74, 0.4);
-  color: #fff;
+  background: rgba(34, 197, 94, 0.36);
+  color: white;
 }
 
-/* ---- Magic UI animation theme tokens (Tailwind v4) ---- */
+button,
+a,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Magic UI animation tokens (Tailwind v4) */
 @theme inline {
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;

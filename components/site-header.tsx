@@ -10,120 +10,129 @@ const NAV_LINKS = [
   { href: "/challenges", label: "Challenges" },
 ];
 
+function Brand() {
+  return (
+    <Link href="/" className="group flex shrink-0 items-center gap-2.5" aria-label="ShipNaija home">
+      <span className="relative grid size-8 place-items-center overflow-hidden rounded-[10px] border border-green-400/20 bg-green-400/[0.08] text-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors group-hover:border-green-400/40">
+        <span className="absolute inset-x-1 bottom-0 h-px bg-gradient-to-r from-transparent via-green-400 to-transparent" />
+        🚢
+      </span>
+      <span className="text-[15px] font-semibold tracking-[-0.02em] text-white">
+        ShipNaija<span className="text-green-400">.</span>
+      </span>
+    </Link>
+  );
+}
+
 export async function SiteHeader() {
   const profile = await getCurrentProfile();
-  return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0a0a0a]/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5 font-bold tracking-tight">
-          <span className="flex size-8 items-center justify-center rounded-lg border border-green-500/30 bg-green-500/10 text-base shadow-[0_0_20px_-4px_rgba(22,163,74,0.5)]">
-            🚢
-          </span>
-          <span className="text-[15px]">
-            Ship<span className="text-green-400">Naija</span>
-          </span>
-        </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 text-sm md:flex">
-          {NAV_LINKS.map((l) => (
+  return (
+    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-2xl border border-white/[0.09] bg-[#0a0b0a]/80 px-3 shadow-[0_12px_50px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-4">
+        <Brand />
+
+        <nav className="hidden items-center rounded-full border border-white/[0.06] bg-white/[0.025] p-1 text-[13px] lg:flex">
+          {NAV_LINKS.map((link) => (
             <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-full px-3.5 py-1.5 text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+              key={link.href}
+              href={link.href}
+              className="rounded-full px-3.5 py-1.5 text-white/55 transition-all hover:bg-white/[0.06] hover:text-white"
             >
-              {l.label}
+              {link.label}
             </Link>
           ))}
           <SignedIn>
             <Link
               href="/dashboard"
-              className="rounded-full px-3.5 py-1.5 text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+              className="rounded-full px-3.5 py-1.5 text-white/55 transition-all hover:bg-white/[0.06] hover:text-white"
             >
               Dashboard
             </Link>
           </SignedIn>
         </nav>
 
-        {/* Desktop actions */}
-        <div className="hidden items-center gap-2.5 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="rounded-full px-4 py-1.5 text-sm font-medium text-white/70 transition-colors hover:text-white">
+              <button className="rounded-full px-3.5 py-2 text-[13px] font-medium text-white/60 transition-colors hover:text-white">
                 Sign in
               </button>
             </SignInButton>
             <SignInButton mode="modal">
-              <button className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-black transition-all hover:bg-white/85 hover:shadow-[0_0_24px_-6px_rgba(255,255,255,0.6)]">
+              <button className="group inline-flex items-center gap-1.5 rounded-[10px] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-all hover:bg-green-100">
                 Start shipping
+                <span className="transition-transform group-hover:translate-x-0.5">↗</span>
               </button>
             </SignInButton>
           </SignedOut>
+
           <SignedIn>
             {profile ? (
               <Link
                 href={`/builders/${profile.handle}`}
-                className="text-sm text-white/60 transition-colors hover:text-green-400"
+                className="rounded-full px-3 py-2 text-[13px] text-white/55 hover:text-white"
               >
                 @{profile.handle}
               </Link>
             ) : null}
             <Link
               href="/projects/new"
-              className="rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-black transition-all hover:bg-white/85 hover:shadow-[0_0_24px_-6px_rgba(255,255,255,0.6)]"
+              className="rounded-[10px] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-green-100"
             >
-              + Project
+              + New project
             </Link>
             <UserButton />
           </SignedIn>
         </div>
 
-        {/* Mobile nav (no-JS dropdown via <details>) */}
-        <div className="flex items-center gap-3 md:hidden">
+        <div className="flex items-center gap-2 lg:hidden">
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="rounded-full bg-white px-3.5 py-1.5 text-sm font-semibold text-black">
-                Sign in
+              <button className="rounded-[9px] bg-white px-3.5 py-2 text-xs font-semibold text-black">
+                Join free
               </button>
             </SignInButton>
           </SignedOut>
           <SignedIn>
             <UserButton />
           </SignedIn>
-          <details className="relative">
-            <summary className="flex cursor-pointer select-none items-center rounded-full border border-white/15 px-3.5 py-1.5 text-sm text-white/80 transition-colors hover:bg-white/[0.06] [&::-webkit-details-marker]:hidden">
-              Menu
+
+          <details className="group relative">
+            <summary
+              aria-label="Open navigation"
+              className="grid size-9 cursor-pointer list-none place-items-center rounded-[9px] border border-white/10 text-white/70 transition-colors hover:bg-white/[0.06] [&::-webkit-details-marker]:hidden"
+            >
+              <span className="flex w-4 flex-col gap-1">
+                <span className="h-px w-4 bg-current" />
+                <span className="h-px w-4 bg-current" />
+                <span className="h-px w-4 bg-current" />
+              </span>
             </summary>
-            <nav className="absolute right-0 z-50 mt-2 flex w-52 flex-col rounded-2xl border border-white/10 bg-[#0d0d0d] p-2 text-sm shadow-2xl shadow-black/60">
-              {NAV_LINKS.map((l) => (
+            <nav className="absolute right-0 mt-2 flex w-60 flex-col rounded-2xl border border-white/10 bg-[#0d0e0d]/95 p-2 text-sm shadow-2xl backdrop-blur-xl">
+              <p className="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">
+                Explore ShipNaija
+              </p>
+              {NAV_LINKS.map((link) => (
                 <Link
-                  key={l.href}
-                  href={l.href}
-                  className="rounded-xl px-3 py-2 text-white/70 hover:bg-white/[0.06] hover:text-white"
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-xl px-3 py-2.5 text-white/65 transition-colors hover:bg-white/[0.06] hover:text-white"
                 >
-                  {l.label}
+                  {link.label}
                 </Link>
               ))}
               <SignedIn>
-                <Link
-                  href="/dashboard"
-                  className="rounded-xl px-3 py-2 text-white/70 hover:bg-white/[0.06] hover:text-white"
-                >
+                <Link href="/dashboard" className="rounded-xl px-3 py-2.5 text-white/65 hover:bg-white/[0.06] hover:text-white">
                   Dashboard
                 </Link>
                 {profile ? (
-                  <Link
-                    href={`/builders/${profile.handle}`}
-                    className="rounded-xl px-3 py-2 text-white/50 hover:bg-white/[0.06] hover:text-white"
-                  >
+                  <Link href={`/builders/${profile.handle}`} className="rounded-xl px-3 py-2.5 text-white/45 hover:bg-white/[0.06] hover:text-white">
                     @{profile.handle}
                   </Link>
                 ) : null}
-                <Link
-                  href="/projects/new"
-                  className="mt-1 rounded-xl bg-white px-3 py-2 text-center font-semibold text-black hover:bg-white/85"
-                >
-                  + Project
+                <Link href="/projects/new" className="mt-1 rounded-xl bg-white px-3 py-2.5 text-center font-semibold text-black">
+                  + New project
                 </Link>
               </SignedIn>
             </nav>
