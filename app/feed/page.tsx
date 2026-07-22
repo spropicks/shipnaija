@@ -27,7 +27,7 @@ export default async function FeedPage() {
         <div className="mt-8 flex flex-col gap-6">
           {me ? (
             myProjects.length > 0 ? (
-              <LogComposer projects={myProjects} />
+              <LogComposer projects={myProjects} redirectTo="/feed" />
             ) : (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/60">
                 Add a project first, then start posting build logs.{" "}
@@ -44,7 +44,13 @@ export default async function FeedPage() {
             </div>
           ) : (
             logs.map((log) => (
-              <BuildLogCard key={log.id} log={log} path="/feed" canEngage={Boolean(me)} />
+              <BuildLogCard
+                key={log.id}
+                log={log}
+                path="/feed"
+                canEngage={Boolean(me)}
+                viewerId={me?.id ?? null}
+              />
             ))
           )}
         </div>

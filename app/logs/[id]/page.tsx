@@ -22,7 +22,12 @@ export default async function LogDetailPage({
     <main className="min-h-screen">
       <SiteHeader />
       <section className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-10">
-        <BuildLogCard log={log} path={`/logs/${log.id}`} canEngage={Boolean(me)} />
+        <BuildLogCard
+          log={log}
+          path={`/logs/${log.id}`}
+          canEngage={Boolean(me)}
+          viewerId={me?.id ?? null}
+        />
         <h2 className="text-lg font-semibold">Comments</h2>
         <CommentSection
           targetType="build_log"

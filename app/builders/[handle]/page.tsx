@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { ProjectCard } from "@/components/project-card";
+import { BuildLogCard } from "@/components/build-log-card";
 import { getCurrentProfile } from "@/lib/auth";
 import { getProfileByHandle, listProjectsByOwner } from "@/lib/queries";
+import { listAuthorFeed } from "@/lib/feed";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +22,9 @@ export default async function BuilderProfilePage({
     listProjectsByOwner(profile.id),
     getCurrentProfile(),
   ]);
+  const logs = await listAuthorFeed(profile.id, me?.id ?? null, 10);
   const isOwner = me?.id === profile.id;
+  const path = `/builders/${profile.handle}`;
 
   return (
     <main className="min-h-screen">
@@ -112,6 +116,27 @@ export default async function BuilderProfilePage({
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {projects.map((p) => (
                 <ProjectCard key={p.id} project={p} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-12">
+          <h2 className="text-xl font-semibold">Recent build logs</h2>
+          {logs.length === 0 ? (
+            <p className="mt-6 text-white/50">
+              No build logs yet{isOwner ? " — wetin you ship today? 🚢" : "."}
+            </p>
+          ) : (
+            <div className="mt-6 flex flex-col gap-4">
+              {logs.map((log) => (
+                <BuildLogCard
+                  key={log.id}
+                  log={log}
+                  path={path}
+                  canEngage={Boolean(me)}
+                  viewerId={me?.id ?? null}
+                />
               ))}
             </div>
           )}

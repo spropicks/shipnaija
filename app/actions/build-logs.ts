@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
 
+function safePath(raw: FormDataEntryValue | null, fallback: string): string {
+  const p = String(raw ?? "").trim();
+  return p.startsWith("/") ? p : fallback;
+}
+
 // Posting a build log also updates the author's shipping streak.
 export async function createBuildLog(formData: FormData) {
   const profile = await getCurrentProfile();
@@ -13,6 +18,8 @@ export async function createBuildLog(formData: FormData) {
   const content = String(formData.get("content") ?? "").trim();
   const projectId = String(formData.get("project_id") ?? "").trim();
   const linkUrl = String(formData.get("link_url") ?? "").trim() || null;
+  const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
+  const redirectTo = safePath(formData.get("redirect_to"), "/feed");
   if (!content || !projectId) throw new Error("Content and project are required");
 
   const supabase = createServiceClient();
@@ -32,20 +39,23 @@ export async function createBuildLog(formData: FormData) {
     author_id: profile.id,
     content: content.slice(0, 1000),
     link_url: linkUrl,
+    image_url: imageUrl,
   });
   if (error) throw new Error(error.message);
 
   await updateStreak(profile.id);
 
   revalidatePath("/feed");
+  revalidatePath("/dashboard");
   revalidatePath(`/projects/${project.slug}`);
-  redirect("/feed");
+  redirect(redirectTo);
 }
 
 export async function deleteBuildLog(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/");
   const id = String(formData.get("id") ?? "");
+  const path = safePath(formData.get("path"), "/feed");
   const supabase = createServiceClient();
   const { error } = await supabase
     .from("build_logs")
@@ -54,6 +64,8 @@ export async function deleteBuildLog(formData: FormData) {
     .eq("author_id", profile.id);
   if (error) throw new Error(error.message);
   revalidatePath("/feed");
+  revalidatePath("/dashboard");
+  revalidatePath(path);
 }
 
 // Streak rule: consecutive calendar days (UTC) with >= 1 build log.

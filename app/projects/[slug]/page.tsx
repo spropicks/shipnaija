@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
+import { BuildLogCard } from "@/components/build-log-card";
+import { CommentSection } from "@/components/comment-section";
+import { LikeButton } from "@/components/like-button";
+import { LogComposer } from "@/components/log-composer";
 import { getCurrentProfile } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/queries";
+import { listProjectFeed, getProjectEngagement, getComments } from "@/lib/feed";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +26,13 @@ export default async function ProjectDetailPage({
   const [project, me] = await Promise.all([getProjectBySlug(slug), getCurrentProfile()]);
   if (!project) notFound();
   const isOwner = me?.id === project.owner_id;
+  const path = `/projects/${project.slug}`;
+
+  const [logs, engagement, comments] = await Promise.all([
+    listProjectFeed(project.id, me?.id ?? null),
+    getProjectEngagement(project.id, me?.id ?? null),
+    getComments("project", project.id),
+  ]);
 
   return (
     <main className="min-h-screen">
@@ -33,6 +45,14 @@ export default async function ProjectDetailPage({
           >
             {project.status}
           </span>
+          <LikeButton
+            targetType="project"
+            targetId={project.id}
+            count={engagement.like_count}
+            liked={engagement.liked_by_me}
+            path={path}
+            disabled={!me}
+          />
           {isOwner ? (
             <Link
               href={`/projects/${project.slug}/edit`}
@@ -80,8 +100,51 @@ export default async function ProjectDetailPage({
         {project.description ? (
           <div className="mt-8 whitespace-pre-wrap text-white/80">{project.description}</div>
         ) : null}
-        <div className="mt-12 rounded-xl border border-white/10 bg-white/[0.03] p-6 text-center text-white/50">
-          Build logs land here in M2 🚧
+
+        {/* Build logs */}
+        <div className="mt-12">
+          <h2 className="text-xl font-semibold">
+            Build logs <span className="text-white/40">({logs.length})</span>
+          </h2>
+          {isOwner ? (
+            <div className="mt-4">
+              <LogComposer projects={[project]} redirectTo={path} />
+            </div>
+          ) : null}
+          {logs.length === 0 ? (
+            <p className="mt-4 text-sm text-white/50">
+              No build logs yet{isOwner ? " — ship the first update! 🚢" : " — check back soon."}
+            </p>
+          ) : (
+            <div className="mt-4 flex flex-col gap-4">
+              {logs.map((log) => (
+                <BuildLogCard
+                  key={log.id}
+                  log={log}
+                  path={path}
+                  canEngage={Boolean(me)}
+                  viewerId={me?.id ?? null}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Project comments */}
+        <div className="mt-12">
+          <h2 className="text-xl font-semibold">
+            Feedback <span className="text-white/40">({comments.length})</span>
+          </h2>
+          <div className="mt-4">
+            <CommentSection
+              targetType="project"
+              targetId={project.id}
+              comments={comments}
+              viewerProfileId={me?.id ?? null}
+              path={path}
+              canEngage={Boolean(me)}
+            />
+          </div>
         </div>
       </section>
     </main>

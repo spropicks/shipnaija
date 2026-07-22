@@ -163,7 +163,7 @@ export default async function DashboardPage() {
           <h2 className="text-xl font-semibold">Ship something now</h2>
           <div className="mt-4">
             {data.projects.length > 0 ? (
-              <LogComposer projects={data.projects} />
+              <LogComposer projects={data.projects} redirectTo="/dashboard" />
             ) : (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm text-white/60">
                 You need a project before you can post build logs.{" "}
@@ -224,7 +224,13 @@ export default async function DashboardPage() {
           ) : (
             <div className="mt-4 flex flex-col gap-4">
               {data.recentLogs.map((log) => (
-                <BuildLogCard key={log.id} log={log} path="/dashboard" canEngage={true} />
+                <BuildLogCard
+                  key={log.id}
+                  log={log}
+                  path="/dashboard"
+                  canEngage={true}
+                  viewerId={me.id}
+                />
               ))}
             </div>
           )}

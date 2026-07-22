@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LikeButton } from "@/components/like-button";
+import { deleteBuildLog } from "@/app/actions/build-logs";
 import type { FeedLog } from "@/lib/feed";
 
 function timeAgo(iso: string): string {
@@ -18,11 +19,14 @@ export function BuildLogCard({
   log,
   path,
   canEngage,
+  viewerId = null,
 }: {
   log: FeedLog;
   path: string;
   canEngage: boolean;
+  viewerId?: string | null;
 }) {
+  const isAuthor = Boolean(viewerId && viewerId === log.author_id);
   return (
     <article className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
       <div className="flex items-center gap-3">
@@ -60,6 +64,14 @@ export function BuildLogCard({
       <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-white/85">
         {log.content}
       </p>
+      {log.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={log.image_url}
+          alt="Build log screenshot"
+          className="mt-3 max-h-96 w-full rounded-lg border border-white/10 object-cover"
+        />
+      ) : null}
       {log.link_url ? (
         <a
           href={log.link_url}
@@ -85,6 +97,18 @@ export function BuildLogCard({
         >
           💬 {log.comment_count}
         </Link>
+        {isAuthor ? (
+          <form action={deleteBuildLog} className="ml-auto inline">
+            <input type="hidden" name="id" value={log.id} />
+            <input type="hidden" name="path" value={path} />
+            <button
+              type="submit"
+              className="text-xs text-white/25 transition hover:text-red-400"
+            >
+              delete
+            </button>
+          </form>
+        ) : null}
       </div>
     </article>
   );

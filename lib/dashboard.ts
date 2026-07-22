@@ -119,7 +119,7 @@ export async function getDashboardData(me: Profile): Promise<DashboardData> {
   const { data: recentRaw } = await supabase
     .from("build_logs")
     .select(
-      "id, content, link_url, created_at, author:profiles!build_logs_author_id_fkey(handle, display_name, avatar_url, current_streak), project:projects!build_logs_project_id_fkey(slug, name)"
+      "id, content, link_url, image_url, created_at, author_id, author:profiles!build_logs_author_id_fkey(handle, display_name, avatar_url, current_streak), project:projects!build_logs_project_id_fkey(slug, name)"
     )
     .eq("author_id", me.id)
     .order("created_at", { ascending: false })
