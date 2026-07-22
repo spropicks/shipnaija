@@ -6,9 +6,20 @@
   --brand: #16a34a; /* Naija green */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(22, 163, 74, 0.4);
+  color: #fff;
 }
 
 /* ---- Magic UI animation theme tokens (Tailwind v4) ---- */
