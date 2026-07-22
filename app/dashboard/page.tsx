@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { SignedOut, SignInButton } from "@clerk/nextjs";
 import { SiteHeader } from "@/components/site-header";
+import { MobileDashboard } from "@/components/mobile-dashboard";
 import { LogComposer } from "@/components/log-composer";
 import { BuildLogCard } from "@/components/build-log-card";
 import { StreakCalendar } from "@/components/streak-calendar";
@@ -129,8 +130,9 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen">
       <SiteHeader />
+      <MobileDashboard me={me} data={data} />
 
-      <section className="mx-auto w-full max-w-6xl px-3 pb-20 pt-8 sm:px-5 sm:pb-24 sm:pt-14">
+      <section className="mx-auto hidden w-full max-w-6xl px-5 pb-24 pt-14 md:block">
         <BlurFade>
           <div className="flex flex-col gap-6 border-b border-white/[0.07] pb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>
