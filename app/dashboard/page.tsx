@@ -130,7 +130,7 @@ export default async function DashboardPage() {
     <main className="min-h-screen">
       <SiteHeader />
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-5 sm:pt-14">
+      <section className="mx-auto w-full max-w-6xl px-3 pb-20 pt-8 sm:px-5 sm:pb-24 sm:pt-14">
         <BlurFade>
           <div className="flex flex-col gap-6 border-b border-white/[0.07] pb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -139,17 +139,17 @@ export default async function DashboardPage() {
                 <ChevronRight className="size-3" />
                 <span className="text-white/50">Dashboard</span>
               </div>
-              <h1 className="mt-5 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
+              <h1 className="mt-4 text-3xl font-semibold tracking-[-0.045em] min-[380px]:text-4xl sm:mt-5 sm:text-5xl">
                 How far, <span className="text-green-300">{firstName}</span>?
               </h1>
               <p className="mt-3 text-sm text-white/40">
                 Here&apos;s the state of your shipping journey today.
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
               <Link
                 href="/projects/new"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/[0.09] bg-white/[0.025] px-4 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+                className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-white/[0.09] bg-white/[0.025] px-3 py-2.5 text-xs font-medium text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white sm:gap-2 sm:px-4 sm:text-sm"
               >
                 <Plus className="size-4" />
                 New project
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
               {data.projects.length > 0 ? (
                 <a
                   href="#quick-log"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black transition-colors hover:bg-green-100"
+                  className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-2.5 text-xs font-semibold text-black transition-colors hover:bg-green-100 sm:gap-2 sm:px-4 sm:text-sm"
                 >
                   <Rocket className="size-4" />
                   Log a ship
@@ -208,12 +208,16 @@ export default async function DashboardPage() {
           </div>
         </BlurFade>
 
-        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <BlurFade key={stat.label} delay={0.08 + index * 0.035}>
-                <div className="relative h-full overflow-hidden rounded-2xl border border-white/[0.075] bg-[#0e100e] p-4 sm:p-5">
+              <BlurFade
+                key={stat.label}
+                delay={0.08 + index * 0.035}
+                className={index === stats.length - 1 ? "col-span-2 sm:col-span-1" : ""}
+              >
+                <div className="relative h-full overflow-hidden rounded-2xl border border-white/[0.075] bg-[#0e100e] p-3.5 sm:p-5">
                   {stat.beam ? (
                     <BorderBeam size={65} duration={8} colorFrom="#22c55e" colorTo="#eab308" />
                   ) : null}
@@ -221,7 +225,7 @@ export default async function DashboardPage() {
                     <Icon className={`size-4 ${stat.accent}`} />
                     <span className="text-[9px] uppercase tracking-[0.14em] text-white/20">7d</span>
                   </div>
-                  <p className="mt-5 text-3xl font-semibold tracking-[-0.045em]">
+                  <p className="mt-4 text-2xl font-semibold tracking-[-0.045em] min-[380px]:text-3xl sm:mt-5">
                     {stat.value > 0 ? <NumberTicker value={stat.value} /> : "0"}
                   </p>
                   <p className="mt-1.5 text-xs font-medium text-white/52">{stat.label}</p>
@@ -235,7 +239,7 @@ export default async function DashboardPage() {
         <div className="mt-4 grid gap-4 lg:grid-cols-[1.45fr_.75fr]">
           <BlurFade inView>
             <section className="rounded-2xl border border-white/[0.075] bg-[#0e100e] p-5 sm:p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
                 <div>
                   <div className="flex items-center gap-2">
                     <CalendarDays className="size-4 text-green-300" />
@@ -251,7 +255,7 @@ export default async function DashboardPage() {
                   <span>More</span>
                 </div>
               </div>
-              <div className="mt-7 overflow-x-auto pb-1">
+              <div className="mt-6">
                 <StreakCalendar days={data.activity14d} />
               </div>
               <div className="mt-6 flex items-center justify-between border-t border-white/[0.06] pt-4 text-[10px]">
@@ -350,9 +354,9 @@ export default async function DashboardPage() {
           </section>
         </BlurFade>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[.9fr_1.1fr]">
+        <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-[.9fr_1.1fr]">
           <BlurFade inView>
-            <section className="h-full rounded-2xl border border-white/[0.075] bg-[#0e100e] p-5 sm:p-6">
+            <section className="h-full min-w-0 rounded-2xl border border-white/[0.075] bg-[#0e100e] p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -401,7 +405,7 @@ export default async function DashboardPage() {
           </BlurFade>
 
           <BlurFade inView delay={0.06}>
-            <section className="h-full rounded-2xl border border-white/[0.075] bg-[#0e100e] p-5 sm:p-6">
+            <section className="h-full min-w-0 rounded-2xl border border-white/[0.075] bg-[#0e100e] p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -421,7 +425,7 @@ export default async function DashboardPage() {
                   <p className="mt-3 text-xs text-white/35">Your first ship is the hardest. Log it above.</p>
                 </div>
               ) : (
-                <div className="mt-5 space-y-3 [&>article]:border-white/[0.06] [&>article]:bg-black/15 [&>article]:p-4">
+                <div className="mt-5 min-w-0 space-y-3 [&>article]:min-w-0 [&>article]:border-white/[0.06] [&>article]:bg-black/15 [&>article]:p-3.5 sm:[&>article]:p-4">
                   {data.recentLogs.slice(0, 3).map((log) => (
                     <BuildLogCard key={log.id} log={log} path="/dashboard" canEngage viewerId={me.id} />
                   ))}

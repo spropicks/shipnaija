@@ -34,7 +34,7 @@ export function LogComposer({
         placeholder="What changed today? Shipped a feature, fixed a bug, learned something..."
         className={
           dashboard
-            ? "w-full resize-none bg-transparent px-1 py-1 text-sm leading-6 text-white/75 outline-none placeholder:text-white/20"
+            ? "w-full resize-none bg-transparent px-1 py-1 text-base leading-6 text-white/75 outline-none placeholder:text-white/20 sm:text-sm"
             : "w-full rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
         }
       />
@@ -44,7 +44,7 @@ export function LogComposer({
           required
           className={
             dashboard
-              ? "min-w-0 rounded-lg border border-white/[0.08] bg-[#101210] px-3 py-2.5 text-xs text-white/55 outline-none focus:border-green-400/30"
+              ? "min-w-0 rounded-lg border border-white/[0.08] bg-[#101210] px-3 py-2.5 text-base text-white/55 outline-none focus:border-green-400/30 sm:text-xs"
               : "rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
           }
           defaultValue={projects.length === 1 ? projects[0].id : ""}
@@ -62,7 +62,7 @@ export function LogComposer({
             placeholder="Link (optional)"
             className={
               dashboard
-                ? "min-w-0 flex-1 bg-transparent py-2.5 text-xs text-white/55 outline-none placeholder:text-white/20"
+                ? "min-w-0 flex-1 bg-transparent py-2.5 text-base text-white/55 outline-none placeholder:text-white/20 sm:text-xs"
                 : "min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
             }
           />
@@ -75,7 +75,7 @@ export function LogComposer({
             placeholder="Screenshot URL"
             className={
               dashboard
-                ? "min-w-0 flex-1 bg-transparent py-2.5 text-xs text-white/55 outline-none placeholder:text-white/20"
+                ? "min-w-0 flex-1 bg-transparent py-2.5 text-base text-white/55 outline-none placeholder:text-white/20 sm:text-xs"
                 : "min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
             }
           />
@@ -84,7 +84,7 @@ export function LogComposer({
           type="submit"
           className={
             dashboard
-              ? "inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-black transition-colors hover:bg-green-100"
+              ? "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-green-100 lg:w-auto lg:py-2.5 lg:text-xs"
               : "rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500"
           }
         >

@@ -27,22 +27,23 @@ export function BuildLogCard({
   viewerId?: string | null;
 }) {
   const isAuthor = Boolean(viewerId && viewerId === log.author_id);
+
   return (
-    <article className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-      <div className="flex items-center gap-3">
+    <article className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+      <div className="flex min-w-0 items-center gap-3">
         {log.author.avatar_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={log.author.avatar_url}
             alt=""
-            className="h-9 w-9 rounded-full border border-white/10"
+            className="size-9 shrink-0 rounded-full border border-white/10"
           />
         ) : (
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm">
             {log.author.display_name.slice(0, 1)}
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-sm">
             <Link href={`/builders/${log.author.handle}`} className="font-medium hover:text-green-400">
               {log.author.display_name}
@@ -52,7 +53,7 @@ export function BuildLogCard({
               <span className="ml-1.5 text-xs text-orange-400">🔥 {log.author.current_streak}</span>
             ) : null}
           </p>
-          <p className="text-xs text-white/40">
+          <p className="truncate text-xs text-white/40">
             shipping{" "}
             <Link href={`/projects/${log.project.slug}`} className="text-green-400/80 hover:underline">
               {log.project.name}
@@ -61,9 +62,11 @@ export function BuildLogCard({
           </p>
         </div>
       </div>
-      <p className="mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-white/85">
+
+      <p className="mt-3 break-words whitespace-pre-wrap text-sm leading-relaxed text-white/80 sm:text-[15px]">
         {log.content}
       </p>
+
       {log.image_url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -72,17 +75,20 @@ export function BuildLogCard({
           className="mt-3 max-h-96 w-full rounded-lg border border-white/10 object-cover"
         />
       ) : null}
+
       {log.link_url ? (
         <a
           href={log.link_url}
           target="_blank"
           rel="noreferrer"
-          className="mt-2 inline-block text-sm text-green-400 hover:underline"
+          className="mt-2 block max-w-full truncate text-sm text-green-400 hover:underline"
+          title={log.link_url}
         >
           {log.link_url.replace(/^https?:\/\//, "").slice(0, 60)} ↗
         </a>
       ) : null}
-      <div className="mt-4 flex items-center gap-3">
+
+      <div className="mt-4 flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
         <LikeButton
           targetType="build_log"
           targetId={log.id}
@@ -101,10 +107,7 @@ export function BuildLogCard({
           <form action={deleteBuildLog} className="ml-auto inline">
             <input type="hidden" name="id" value={log.id} />
             <input type="hidden" name="path" value={path} />
-            <button
-              type="submit"
-              className="text-xs text-white/25 transition hover:text-red-400"
-            >
+            <button type="submit" className="px-1 text-xs text-white/25 transition hover:text-red-400">
               delete
             </button>
           </form>
