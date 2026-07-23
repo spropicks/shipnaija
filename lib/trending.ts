@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { effectiveStreak } from "@/lib/streak";
 
 export type TrendingBuilder = {
   id: string;
@@ -73,7 +74,7 @@ export async function getTrending(): Promise<{
     builderStats.size
       ? supabase
           .from("profiles")
-          .select("id, handle, display_name, avatar_url, current_streak")
+          .select("id, handle, display_name, avatar_url, current_streak, last_log_date")
           .in("id", [...builderStats.keys()])
       : Promise.resolve({ data: [] }),
     projectStats.size
@@ -92,14 +93,20 @@ export async function getTrending(): Promise<{
     display_name: string;
     avatar_url: string | null;
     current_streak: number;
+    last_log_date: string | null;
   }[])
     .map((p) => {
       const s = builderStats.get(p.id) ?? { logs: 0, likes: 0 };
+      const streak = effectiveStreak(p.current_streak, p.last_log_date);
       return {
-        ...p,
+        id: p.id,
+        handle: p.handle,
+        display_name: p.display_name,
+        avatar_url: p.avatar_url,
+        current_streak: streak,
         logs_7d: s.logs,
         likes_7d: s.likes,
-        score: s.logs * 2 + s.likes + (p.current_streak ?? 0) * 3,
+        score: s.logs * 2 + s.likes + streak * 3,
       };
     })
     .sort((a, b) => b.score - a.score)

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LikeButton } from "@/components/like-button";
 import { deleteBuildLog } from "@/app/actions/build-logs";
+import { safeExternalUrl } from "@/lib/utils";
 import type { FeedLog } from "@/lib/feed";
 
 function timeAgo(iso: string): string {
@@ -27,6 +28,7 @@ export function BuildLogCard({
   viewerId?: string | null;
 }) {
   const isAuthor = Boolean(viewerId && viewerId === log.author_id);
+  const linkUrl = safeExternalUrl(log.link_url);
 
   return (
     <article className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
@@ -76,15 +78,15 @@ export function BuildLogCard({
         />
       ) : null}
 
-      {log.link_url ? (
+      {linkUrl ? (
         <a
-          href={log.link_url}
+          href={linkUrl}
           target="_blank"
           rel="noreferrer"
           className="mt-2 block max-w-full truncate text-sm text-green-400 hover:underline"
-          title={log.link_url}
+          title={linkUrl}
         >
-          {log.link_url.replace(/^https?:\/\//, "").slice(0, 60)} ↗
+          {linkUrl.replace(/^https?:\/\//, "").slice(0, 60)} ↗
         </a>
       ) : null}
 

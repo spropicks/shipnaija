@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { safeExternalUrl } from "@/lib/utils";
+import type { ActionState } from "@/lib/action-state";
 
 function safePath(raw: FormDataEntryValue | null, fallback: string): string {
   const p = String(raw ?? "").trim();
@@ -11,16 +13,21 @@ function safePath(raw: FormDataEntryValue | null, fallback: string): string {
 }
 
 // Posting a build log also updates the author's shipping streak.
-export async function createBuildLog(formData: FormData) {
+export async function createBuildLog(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/");
+  if (!profile) return { ok: false, message: "Sign in to post a log." };
 
   const content = String(formData.get("content") ?? "").trim();
   const projectId = String(formData.get("project_id") ?? "").trim();
-  const linkUrl = String(formData.get("link_url") ?? "").trim() || null;
-  const imageUrl = String(formData.get("image_url") ?? "").trim() || null;
+  const linkUrl = safeExternalUrl(formData.get("link_url") as string | null);
+  const imageUrl = safeExternalUrl(formData.get("image_url") as string | null);
   const redirectTo = safePath(formData.get("redirect_to"), "/feed");
-  if (!content || !projectId) throw new Error("Content and project are required");
+  if (!content || !projectId) {
+    return { ok: false, message: "Content and project are required." };
+  }
 
   const supabase = createServiceClient();
 
@@ -31,7 +38,7 @@ export async function createBuildLog(formData: FormData) {
     .eq("id", projectId)
     .maybeSingle();
   if (!project || project.owner_id !== profile.id) {
-    throw new Error("You can only post logs to your own projects");
+    return { ok: false, message: "You can only post logs to your own projects." };
   }
 
   const { error } = await supabase.from("build_logs").insert({
@@ -41,7 +48,7 @@ export async function createBuildLog(formData: FormData) {
     link_url: linkUrl,
     image_url: imageUrl,
   });
-  if (error) throw new Error(error.message);
+  if (error) return { ok: false, message: "Couldn't post your log. Try again." };
 
   await updateStreak(profile.id);
 

@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { normalizeProfile } from "@/lib/auth";
 import type { Profile } from "@/lib/auth";
 
 export type Project = {
@@ -24,7 +25,7 @@ export async function listBuilders(): Promise<Profile[]> {
     .select("*")
     .order("created_at", { ascending: false })
     .limit(100);
-  return (data as Profile[]) ?? [];
+  return ((data as Profile[]) ?? []).map(normalizeProfile);
 }
 
 export async function getProfileByHandle(handle: string): Promise<Profile | null> {
@@ -34,7 +35,7 @@ export async function getProfileByHandle(handle: string): Promise<Profile | null
     .select("*")
     .eq("handle", handle)
     .maybeSingle();
-  return (data as Profile | null) ?? null;
+  return data ? normalizeProfile(data as Profile) : null;
 }
 
 export async function listProjects(): Promise<Project[]> {

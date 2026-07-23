@@ -15,7 +15,7 @@ export type ChallengeEntry = {
   submitted_at: string;
   is_winner: boolean;
   project: { slug: string; name: string; tagline: string | null } | null;
-  builder: { handle: string; display_name: string; avatar_url: string | null } | null;
+  builder: { id: string; handle: string; display_name: string; avatar_url: string | null } | null;
 };
 
 export async function getActiveChallenge(): Promise<Challenge | null> {
@@ -57,7 +57,7 @@ export async function listEntries(challengeId: string): Promise<ChallengeEntry[]
   const { data } = await supabase
     .from("challenge_entries")
     .select(
-      "id, submission_note, submitted_at, is_winner, project:projects!challenge_entries_project_id_fkey(slug, name, tagline), builder:profiles!challenge_entries_builder_id_fkey(handle, display_name, avatar_url)"
+      "id, submission_note, submitted_at, is_winner, project:projects!challenge_entries_project_id_fkey(slug, name, tagline), builder:profiles!challenge_entries_builder_id_fkey(id, handle, display_name, avatar_url)"
     )
     .eq("challenge_id", challengeId)
     .order("submitted_at", { ascending: true });

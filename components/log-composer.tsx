@@ -1,5 +1,10 @@
+"use client";
+
+import { useActionState } from "react";
 import { Link2, ImageIcon, Send } from "lucide-react";
 import { createBuildLog } from "@/app/actions/build-logs";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { IDLE_STATE } from "@/lib/action-state";
 import type { Project } from "@/lib/queries";
 
 export function LogComposer({
@@ -12,10 +17,11 @@ export function LogComposer({
   variant?: "default" | "dashboard";
 }) {
   const dashboard = variant === "dashboard";
+  const [state, formAction] = useActionState(createBuildLog, IDLE_STATE);
 
   return (
     <form
-      action={createBuildLog}
+      action={formAction}
       className={
         dashboard
           ? "rounded-xl border border-white/[0.065] bg-black/15 p-3 sm:p-4"
@@ -31,6 +37,7 @@ export function LogComposer({
         rows={dashboard ? 4 : 3}
         required
         maxLength={1000}
+        aria-label="Build log content"
         placeholder="What changed today? Shipped a feature, fixed a bug, learned something..."
         className={
           dashboard
@@ -42,6 +49,7 @@ export function LogComposer({
         <select
           name="project_id"
           required
+          aria-label="Select a project"
           className={
             dashboard
               ? "min-w-0 rounded-lg border border-white/[0.08] bg-[#101210] px-3 py-2.5 text-base text-white/55 outline-none focus:border-green-400/30 sm:text-xs"
@@ -59,6 +67,7 @@ export function LogComposer({
           <input
             name="link_url"
             type="url"
+            aria-label="Link URL (optional)"
             placeholder="Link (optional)"
             className={
               dashboard
@@ -72,6 +81,7 @@ export function LogComposer({
           <input
             name="image_url"
             type="url"
+            aria-label="Screenshot URL (optional)"
             placeholder="Screenshot URL"
             className={
               dashboard
@@ -80,8 +90,8 @@ export function LogComposer({
             }
           />
         </label>
-        <button
-          type="submit"
+        <SubmitButton
+          pendingLabel="Posting…"
           className={
             dashboard
               ? "inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-green-100 lg:w-auto lg:py-2.5 lg:text-xs"
@@ -90,8 +100,14 @@ export function LogComposer({
         >
           {dashboard ? <Send className="size-3.5" /> : null}
           Post log
-        </button>
+        </SubmitButton>
       </div>
+      {!state.ok && state.message ? (
+        <p className="mt-2 text-xs text-red-400" role="alert">
+          {state.message}
+        </p>
+      ) : null}
     </form>
   );
 }
+

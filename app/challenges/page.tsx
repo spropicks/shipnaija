@@ -15,7 +15,10 @@ export const metadata = { title: "Challenges" };
 
 export default async function ChallengesPage() {
   const [active, all] = await Promise.all([getActiveChallenge(), listChallenges()]);
-  const past = all.filter((c) => c.id !== active?.id);
+  const now = new Date().toISOString();
+  // "Past" = anything that has ended and isn't the currently-active one.
+  // Future/upcoming challenges are intentionally not listed here.
+  const past = all.filter((c) => c.id !== active?.id && c.ends_at < now);
 
   return (
     <main className="min-h-screen">

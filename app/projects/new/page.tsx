@@ -10,7 +10,7 @@ const inputCls =
 
 export default async function NewProjectPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/");
+  if (!profile) redirect("/onboarding");
 
   return (
     <main className="min-h-screen">

@@ -49,20 +49,31 @@ export async function POST(req: Request) {
       [data.first_name, data.last_name].filter(Boolean).join(" ") ||
       data.username ||
       "Builder";
-    const handle =
-      data.username || `builder_${data.id.slice(-8).toLowerCase()}`;
 
-    const { error } = await supabase.from("profiles").upsert(
-      {
-        clerk_user_id: data.id,
-        handle,
-        display_name: displayName,
-        avatar_url: data.image_url ?? null,
-      },
-      { onConflict: "clerk_user_id" }
-    );
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (evt.type === "user.created") {
+      const { error } = await supabase.from("profiles").upsert(
+        {
+          clerk_user_id: data.id,
+          handle: data.username || `builder_${data.id.slice(-8).toLowerCase()}`,
+          display_name: displayName,
+          avatar_url: data.image_url ?? null,
+        },
+        { onConflict: "clerk_user_id" }
+      );
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+    } else {
+      // user.updated: refresh mutable fields only. Never rewrite `handle` — a
+      // later Clerk username change must not move the profile URL or collide.
+      // Pure UPDATE so a not-yet-synced user isn't inserted without a handle.
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: displayName, avatar_url: data.image_url ?? null })
+        .eq("clerk_user_id", data.id);
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
     }
   }
 

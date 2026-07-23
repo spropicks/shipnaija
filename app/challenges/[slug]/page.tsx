@@ -25,9 +25,9 @@ export default async function ChallengeDetailPage({
 
   const now = new Date().toISOString();
   const isOpen = now >= challenge.starts_at && now <= challenge.ends_at;
-  const alreadyEntered = new Set(
-    entries.filter((e) => e.builder && me && e.builder.handle === me.handle).map((e) => e.id)
-  ).size > 0;
+  const alreadyEntered = Boolean(
+    me && entries.some((e) => e.builder?.id === me.id)
+  );
 
   return (
     <main className="min-h-screen">
@@ -52,6 +52,7 @@ export default async function ChallengeDetailPage({
                 name="project_id"
                 required
                 defaultValue=""
+                aria-label="Select a project to enter"
                 className="rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
               >
                 <option value="" disabled>
@@ -66,6 +67,7 @@ export default async function ChallengeDetailPage({
               <input
                 name="submission_note"
                 maxLength={280}
+                aria-label="Submission note (optional)"
                 placeholder="What will you ship this week? (optional)"
                 className="min-w-0 flex-1 rounded-md border border-white/15 bg-black/30 px-3 py-2 text-sm outline-none focus:border-green-500"
               />
@@ -78,13 +80,23 @@ export default async function ChallengeDetailPage({
             </div>
           </form>
         ) : null}
-        {isOpen && me && myProjects.length === 0 ? (
+        {isOpen && me && myProjects.length === 0 && !alreadyEntered ? (
           <p className="mt-8 text-sm text-white/60">
             <Link href="/projects/new" className="text-green-400 hover:underline">
               Add a project
             </Link>{" "}
             first, then enter the challenge.
           </p>
+        ) : null}
+        {isOpen && me && alreadyEntered ? (
+          <div className="mt-8 rounded-xl border border-green-500/30 bg-green-500/[0.06] p-5">
+            <p className="text-sm font-medium text-green-400">
+              You&apos;ve entered this challenge ✅
+            </p>
+            <p className="mt-1 text-sm text-white/60">
+              Keep shipping and posting build logs — winners are picked when the week closes.
+            </p>
+          </div>
         ) : null}
         {isOpen && !me ? (
           <p className="mt-8 text-sm text-white/60">Sign in to enter this challenge.</p>

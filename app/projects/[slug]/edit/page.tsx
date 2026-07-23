@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
+import { DeleteProjectForm } from "@/components/delete-project-button";
 import { getCurrentProfile } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/queries";
 import { updateProject } from "@/app/actions/projects";
@@ -65,6 +66,16 @@ export default async function EditProjectPage({
             Save changes
           </button>
         </form>
+
+        <div className="mt-12 rounded-xl border border-red-500/20 bg-red-500/[0.03] p-5">
+          <h2 className="text-sm font-semibold text-red-400">Danger zone</h2>
+          <p className="mt-1 text-sm text-white/50">
+            Deleting a project permanently removes it along with all its build logs, likes, and comments.
+          </p>
+          <div className="mt-4">
+            <DeleteProjectForm projectId={project.id} projectName={project.name} />
+          </div>
+        </div>
       </section>
     </main>
   );

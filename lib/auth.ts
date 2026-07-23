@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { effectiveStreak } from "@/lib/streak";
 
 export type Profile = {
   id: string;
@@ -15,8 +16,17 @@ export type Profile = {
   website_url: string | null;
   current_streak: number;
   longest_streak: number;
+  last_log_date: string | null;
   created_at: string;
 };
+
+// Normalizes a raw profile row so `current_streak` reflects reality (0 if the
+// streak has lapsed) regardless of when it was last written.
+export function normalizeProfile<T extends { current_streak: number; last_log_date: string | null }>(
+  row: T
+): T {
+  return { ...row, current_streak: effectiveStreak(row.current_streak, row.last_log_date) };
+}
 
 // Returns the Supabase profile for the signed-in Clerk user, or null.
 // Self-healing: if the user is signed in with Clerk but has no profile row
@@ -32,7 +42,7 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     .select("*")
     .eq("clerk_user_id", userId)
     .maybeSingle();
-  if (data) return data as Profile;
+  if (data) return normalizeProfile(data as Profile);
 
   // No row yet — sync from Clerk now.
   return syncProfileFromClerk(userId);

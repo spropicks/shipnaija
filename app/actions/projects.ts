@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import { safeExternalUrl } from "@/lib/utils";
 
 function slugify(name: string): string {
   return name
@@ -50,8 +51,8 @@ export async function createProject(formData: FormData) {
     name,
     tagline: String(formData.get("tagline") ?? "").trim() || null,
     description: String(formData.get("description") ?? "").trim() || null,
-    demo_url: String(formData.get("demo_url") ?? "").trim() || null,
-    repo_url: String(formData.get("repo_url") ?? "").trim() || null,
+    demo_url: safeExternalUrl(formData.get("demo_url") as string | null),
+    repo_url: safeExternalUrl(formData.get("repo_url") as string | null),
     tech_stack: parseStack(formData.get("tech_stack")),
     status: (STATUSES as readonly string[]).includes(status) ? status : "building",
   });
@@ -83,8 +84,8 @@ export async function updateProject(formData: FormData) {
       name: String(formData.get("name") ?? "").trim() || undefined,
       tagline: String(formData.get("tagline") ?? "").trim() || null,
       description: String(formData.get("description") ?? "").trim() || null,
-      demo_url: String(formData.get("demo_url") ?? "").trim() || null,
-      repo_url: String(formData.get("repo_url") ?? "").trim() || null,
+      demo_url: safeExternalUrl(formData.get("demo_url") as string | null),
+      repo_url: safeExternalUrl(formData.get("repo_url") as string | null),
       tech_stack: parseStack(formData.get("tech_stack")),
       status: (STATUSES as readonly string[]).includes(status) ? status : "building",
     })
@@ -95,4 +96,40 @@ export async function updateProject(formData: FormData) {
   revalidatePath("/projects");
   revalidatePath(`/projects/${project.slug}`);
   redirect(`/projects/${project.slug}`);
+}
+
+export async function deleteProject(formData: FormData) {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/");
+
+  const id = String(formData.get("id") ?? "");
+  const supabase = createServiceClient();
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("id, owner_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!project || project.owner_id !== profile.id) redirect("/projects");
+
+  // Likes and comments are polymorphic (target_type/target_id) so they don't
+  // cascade via FK — remove them explicitly. Build logs cascade via their FK,
+  // but any likes/comments ON those logs are also polymorphic; clear them too.
+  const { data: logs } = await supabase
+    .from("build_logs")
+    .select("id")
+    .eq("project_id", project.id);
+  const logIds = (logs ?? []).map((l) => l.id);
+
+  const targetIds = [project.id, ...logIds];
+  await supabase.from("likes").delete().in("target_id", targetIds);
+  await supabase.from("comments").delete().in("target_id", targetIds);
+
+  // Deletes build_logs (cascade) and challenge_entries (cascade) via FK.
+  const { error } = await supabase.from("projects").delete().eq("id", project.id);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/projects");
+  revalidatePath("/dashboard");
+  redirect("/projects");
 }

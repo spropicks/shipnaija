@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { effectiveStreak } from "@/lib/streak";
 import type { Profile } from "@/lib/auth";
 import type { Project } from "@/lib/queries";
 import type { FeedLog } from "@/lib/feed";
@@ -119,7 +120,7 @@ export async function getDashboardData(me: Profile): Promise<DashboardData> {
   const { data: recentRaw } = await supabase
     .from("build_logs")
     .select(
-      "id, content, link_url, image_url, created_at, author_id, author:profiles!build_logs_author_id_fkey(handle, display_name, avatar_url, current_streak), project:projects!build_logs_project_id_fkey(slug, name)"
+      "id, content, link_url, image_url, created_at, author_id, author:profiles!build_logs_author_id_fkey(handle, display_name, avatar_url, current_streak, last_log_date), project:projects!build_logs_project_id_fkey(slug, name)"
     )
     .eq("author_id", me.id)
     .order("created_at", { ascending: false })
@@ -153,12 +154,19 @@ export async function getDashboardData(me: Profile): Promise<DashboardData> {
   const recentLogs: FeedLog[] = ((recentRaw ?? []) as unknown as Omit<
     FeedLog,
     "like_count" | "comment_count" | "liked_by_me"
-  >[]).map((l) => ({
-    ...l,
-    like_count: likeCounts.get(l.id) ?? 0,
-    comment_count: commentCounts.get(l.id) ?? 0,
-    liked_by_me: mineSet.has(l.id),
-  }));
+  >[]).map((l) => {
+    const author = l.author as typeof l.author & { last_log_date?: string | null };
+    return {
+      ...l,
+      author: {
+        ...l.author,
+        current_streak: effectiveStreak(author.current_streak, author.last_log_date ?? null),
+      },
+      like_count: likeCounts.get(l.id) ?? 0,
+      comment_count: commentCounts.get(l.id) ?? 0,
+      liked_by_me: mineSet.has(l.id),
+    };
+  });
 
   return {
     shippedToday: logs14.some((l) => utcDay(l.created_at) === todayUtc),

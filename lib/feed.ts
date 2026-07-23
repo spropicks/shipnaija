@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { effectiveStreak } from "@/lib/streak";
 
 export type FeedLog = {
   id: string;
@@ -23,11 +24,14 @@ export type LogComment = {
 };
 
 const LOG_SELECT =
-  "id, content, link_url, image_url, created_at, author_id, author:profiles!build_logs_author_id_fkey(handle, display_name, avatar_url, current_streak), project:projects!build_logs_project_id_fkey(slug, name)";
+  "id, content, link_url, image_url, created_at, author_id, author:profiles!build_logs_author_id_fkey(handle, display_name, avatar_url, current_streak, last_log_date), project:projects!build_logs_project_id_fkey(slug, name)";
 
 type RawLog = Omit<FeedLog, "like_count" | "comment_count" | "liked_by_me">;
 
 async function hydrateLogs(logs: RawLog[], viewerId: string | null): Promise<FeedLog[]> {
+  // Drop orphaned logs whose author or project row is missing (deleted / null FK).
+  // A null embedded join would otherwise crash any card that renders it.
+  logs = logs.filter((l) => l.author && l.project);
   if (!logs.length) return [];
   const supabase = createServiceClient();
   const ids = logs.map((l) => l.id);
@@ -54,12 +58,19 @@ async function hydrateLogs(logs: RawLog[], viewerId: string | null): Promise<Fee
   }
   const mine = new Set((myLikesRes.data ?? []).map((r) => r.target_id));
 
-  return logs.map((l) => ({
-    ...l,
-    like_count: likeCounts.get(l.id) ?? 0,
-    comment_count: commentCounts.get(l.id) ?? 0,
-    liked_by_me: mine.has(l.id),
-  }));
+  return logs.map((l) => {
+    const author = l.author as typeof l.author & { last_log_date?: string | null };
+    return {
+      ...l,
+      author: {
+        ...l.author,
+        current_streak: effectiveStreak(author.current_streak, author.last_log_date ?? null),
+      },
+      like_count: likeCounts.get(l.id) ?? 0,
+      comment_count: commentCounts.get(l.id) ?? 0,
+      liked_by_me: mine.has(l.id),
+    };
+  });
 }
 
 export async function listFeed(viewerId: string | null, limit = 50): Promise<FeedLog[]> {

@@ -8,6 +8,7 @@ import { LogComposer } from "@/components/log-composer";
 import { getCurrentProfile } from "@/lib/auth";
 import { getProjectBySlug } from "@/lib/queries";
 import { listProjectFeed, getProjectEngagement, getComments } from "@/lib/feed";
+import { safeExternalUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -74,13 +75,13 @@ export default async function ProjectDetailPage({
           </p>
         ) : null}
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
-          {project.demo_url ? (
-            <a href={project.demo_url} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
+          {safeExternalUrl(project.demo_url) ? (
+            <a href={safeExternalUrl(project.demo_url)!} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
               Live demo ↗
             </a>
           ) : null}
-          {project.repo_url ? (
-            <a href={project.repo_url} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
+          {safeExternalUrl(project.repo_url) ? (
+            <a href={safeExternalUrl(project.repo_url)!} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
               Repo ↗
             </a>
           ) : null}

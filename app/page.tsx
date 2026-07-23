@@ -538,7 +538,7 @@ export default async function Home() {
       </section>
 
       <section className="border-y border-white/[0.06] bg-white/[0.012]">
-        <div className="mx-auto grid max-w-6xl grid-cols-3 divide-x divide-white/[0.06] px-5">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 divide-y divide-white/[0.06] px-5 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           {[
             ["builders", stats.builders, Users],
             ["projects", stats.projects, FolderKanban],
