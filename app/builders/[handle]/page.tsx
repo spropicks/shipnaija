@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Flame, FolderKanban, Activity, Trophy } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { ProjectCard } from "@/components/project-card";
 import { BuildLogCard } from "@/components/build-log-card";
+import { Avatar } from "@/components/ui/avatar";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatTile } from "@/components/ui/stat-tile";
 import { getCurrentProfile } from "@/lib/auth";
 import { getProfileByHandle, listProjectsByOwner } from "@/lib/queries";
 import { listAuthorFeed } from "@/lib/feed";
+import { createServiceClient } from "@/lib/supabase/server";
+import { safeExternalUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -18,69 +24,66 @@ export default async function BuilderProfilePage({
   const profile = await getProfileByHandle(handle);
   if (!profile) notFound();
 
-  const [projects, me] = await Promise.all([
+  const [projects, me, supabase] = await Promise.all([
     listProjectsByOwner(profile.id),
     getCurrentProfile(),
+    Promise.resolve(createServiceClient()),
   ]);
-  const logs = await listAuthorFeed(profile.id, me?.id ?? null, 10);
+  const [logs, logCountRes] = await Promise.all([
+    listAuthorFeed(profile.id, me?.id ?? null, 10),
+    supabase.from("build_logs").select("id", { count: "exact", head: true }).eq("author_id", profile.id),
+  ]);
   const isOwner = me?.id === profile.id;
   const path = `/builders/${profile.handle}`;
+  const projectCount = projects.length;
+  const logCount = logCountRes.count ?? logs.length;
+
+  const xUrl = safeExternalUrl(profile.twitter_url);
+  const ghUrl = safeExternalUrl(profile.github_url);
+  const webUrl = safeExternalUrl(profile.website_url);
 
   return (
     <main className="min-h-screen">
       <SiteHeader />
       <section className="mx-auto max-w-4xl px-6 py-10">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          {profile.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt={profile.display_name}
-              className="h-24 w-24 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-600/30 text-3xl font-bold text-green-400">
-              {profile.display_name.slice(0, 1).toUpperCase()}
-            </div>
-          )}
+        <Link
+          href="/builders"
+          className="inline-flex items-center gap-1.5 text-xs text-white/40 transition hover:text-white"
+        >
+          <ArrowLeft className="size-3.5" /> All builders
+        </Link>
+
+        <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-start">
+          <Avatar src={profile.avatar_url} name={profile.display_name} size={96} className="size-24" />
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-bold">{profile.display_name}</h1>
-              <span className="text-white/50">@{profile.handle}</span>
+            <PageHeader
+              eyebrow={`@${profile.handle}`}
+              title={profile.display_name}
+              subtitle={profile.bio ?? undefined}
+            >
               {isOwner ? (
                 <Link
                   href="/profile/edit"
-                  className="rounded-md border border-white/20 px-3 py-1 text-sm text-white/70 hover:border-green-500/50 hover:text-green-400"
+                  className="rounded-md border border-white/20 px-3 py-2 text-sm text-white/70 transition hover:border-green-500/50 hover:text-green-400"
                 >
                   Edit profile
                 </Link>
               ) : null}
-            </div>
-            {profile.bio ? <p className="mt-2 text-white/80">{profile.bio}</p> : null}
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-white/60">
-              {profile.location ? <span>📍 {profile.location}</span> : null}
-              <span className="text-orange-400">
-                🔥 {profile.current_streak}-day streak
-              </span>
-              <span>🏆 longest: {profile.longest_streak}</span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-3 text-sm">
-              {profile.twitter_url ? (
-                <a href={profile.twitter_url} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
-                  X / Twitter
-                </a>
-              ) : null}
-              {profile.github_url ? (
-                <a href={profile.github_url} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
-                  GitHub
-                </a>
-              ) : null}
-              {profile.website_url ? (
-                <a href={profile.website_url} className="text-green-400 hover:underline" target="_blank" rel="noreferrer">
-                  Website
-                </a>
-              ) : null}
-            </div>
+            </PageHeader>
+            {(profile.location || xUrl || ghUrl || webUrl) ? (
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/55">
+                {profile.location ? <span>📍 {profile.location}</span> : null}
+                {xUrl ? (
+                  <a href={xUrl} className="hover:text-green-400" target="_blank" rel="noreferrer">X / Twitter ↗</a>
+                ) : null}
+                {ghUrl ? (
+                  <a href={ghUrl} className="hover:text-green-400" target="_blank" rel="noreferrer">GitHub ↗</a>
+                ) : null}
+                {webUrl ? (
+                  <a href={webUrl} className="hover:text-green-400" target="_blank" rel="noreferrer">Website ↗</a>
+                ) : null}
+              </div>
+            ) : null}
             {profile.tech_stack?.length ? (
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {profile.tech_stack.map((t) => (
@@ -94,6 +97,13 @@ export default async function BuilderProfilePage({
               </div>
             ) : null}
           </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile icon={Flame} label="Streak" value={`${profile.current_streak}d`} tone="warn" />
+          <StatTile icon={Trophy} label="Longest" value={`${profile.longest_streak}d`} />
+          <StatTile icon={FolderKanban} label="Projects" value={projectCount} />
+          <StatTile icon={Activity} label="Build logs" value={logCount} />
         </div>
 
         <div className="mt-12">
@@ -125,7 +135,7 @@ export default async function BuilderProfilePage({
           <h2 className="text-xl font-semibold">Recent build logs</h2>
           {logs.length === 0 ? (
             <p className="mt-6 text-white/50">
-              No build logs yet{isOwner ? " — wetin you ship today? 🚢" : "."}
+              No build logs yet{isOwner ? " — wetin you ship today?" : "."}
             </p>
           ) : (
             <div className="mt-6 flex flex-col gap-4">
