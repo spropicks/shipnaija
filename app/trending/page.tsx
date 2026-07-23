@@ -10,8 +10,28 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 
 export const metadata = { title: "Trending" };
 
+function Rank({ i }: { i: number }) {
+  if (i < 3) return <span className="w-7 shrink-0 text-center text-lg">{MEDALS[i]}</span>;
+  return (
+    <span className="grid size-7 shrink-0 place-items-center rounded-full border border-white/10 text-xs text-white/45">
+      {i + 1}
+    </span>
+  );
+}
+
+function ScoreBar({ value, max }: { value: number; max: number }) {
+  const pct = max > 0 ? Math.max(6, Math.round((value / max) * 100)) : 0;
+  return (
+    <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+      <div className="h-full rounded-full bg-green-500/60" style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
 export default async function TrendingPage() {
   const { builders, projects } = await getTrending();
+  const maxBuilderScore = builders[0]?.score ?? 0;
+  const maxProjectScore = projects[0]?.score ?? 0;
 
   return (
     <main className="min-h-screen">
@@ -36,22 +56,23 @@ export default async function TrendingPage() {
                   <li key={b.id}>
                     <Link
                       href={`/builders/${b.handle}`}
-                      className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-green-500/40"
+                      className="block rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-green-500/40"
                     >
-                      <span className="w-7 shrink-0 text-center text-sm text-white/50">
-                        {MEDALS[i] ?? `#${i + 1}`}
-                      </span>
-                      <Avatar src={b.avatar_url} name={b.display_name} size={32} />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{b.display_name}</p>
-                        <p className="truncate text-xs text-white/50">@{b.handle}</p>
+                      <div className="flex items-center gap-3">
+                        <Rank i={i} />
+                        <Avatar src={b.avatar_url} name={b.display_name} size={32} />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{b.display_name}</p>
+                          <p className="truncate text-xs text-white/50">@{b.handle}</p>
+                        </div>
+                        <div className="shrink-0 text-right text-xs text-white/50">
+                          <p>{b.logs_7d} logs · 💚 {b.likes_7d}</p>
+                          {b.current_streak > 1 ? (
+                            <p className="text-orange-400">🔥 {b.current_streak}-day streak</p>
+                          ) : null}
+                        </div>
                       </div>
-                      <div className="shrink-0 text-right text-xs text-white/50">
-                        <p>{b.logs_7d} logs · 💚 {b.likes_7d}</p>
-                        {b.current_streak > 1 ? (
-                          <p className="text-orange-400">🔥 {b.current_streak}-day streak</p>
-                        ) : null}
-                      </div>
+                      <ScoreBar value={b.score} max={maxBuilderScore} />
                     </Link>
                   </li>
                 ))}
@@ -71,21 +92,22 @@ export default async function TrendingPage() {
                   <li key={p.id}>
                     <Link
                       href={`/projects/${p.slug}`}
-                      className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-green-500/40"
+                      className="block rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-green-500/40"
                     >
-                      <span className="w-7 shrink-0 text-center text-sm text-white/50">
-                        {MEDALS[i] ?? `#${i + 1}`}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{p.name}</p>
-                        <p className="truncate text-xs text-white/50">
-                          {p.owner ? `by @${p.owner.handle}` : ""}
-                          {p.tagline ? ` — ${p.tagline}` : ""}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <Rank i={i} />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{p.name}</p>
+                          <p className="truncate text-xs text-white/50">
+                            {p.owner ? `by @${p.owner.handle}` : ""}
+                            {p.tagline ? ` — ${p.tagline}` : ""}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right text-xs text-white/50">
+                          <p>{p.logs_7d} logs · 💚 {p.likes_7d}</p>
+                        </div>
                       </div>
-                      <div className="shrink-0 text-right text-xs text-white/50">
-                        <p>{p.logs_7d} logs · 💚 {p.likes_7d}</p>
-                      </div>
+                      <ScoreBar value={p.score} max={maxProjectScore} />
                     </Link>
                   </li>
                 ))}

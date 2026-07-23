@@ -1,5 +1,5 @@
 import { SiteHeader } from "@/components/site-header";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectsExplorer } from "@/components/projects-explorer";
 import { PageHeader } from "@/components/ui/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listProjects } from "@/lib/queries";
@@ -31,11 +31,7 @@ export default async function ProjectsPage() {
             />
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((p) => (
-              <ProjectCard key={p.id} project={p} />
-            ))}
-          </div>
+          <ProjectsExplorer projects={projects} />
         )}
       </section>
     </main>
