@@ -23,9 +23,15 @@ function normalizeHandle(raw: FormDataEntryValue | null): string {
     .slice(0, 30);
 }
 
-export async function updateProfile(formData: FormData) {
+// Shape compatible with useActionState (the onboarding/profile-edit forms
+// call it via useActionState; the direct form-action path on /profile/edit
+// also still works because redirect() throws, so the return is ignored).
+export async function updateProfile(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/");
+  if (!profile) return { ok: false, message: "Sign in to update your profile." };
 
   const supabase = createServiceClient();
   const { error } = await supabase
@@ -44,7 +50,7 @@ export async function updateProfile(formData: FormData) {
     })
     .eq("id", profile.id);
 
-  if (error) throw new Error(error.message);
+  if (error) return { ok: false, message: "Couldn't save your changes. Try again." };
 
   revalidatePath("/builders");
   revalidatePath(`/builders/${profile.handle}`);

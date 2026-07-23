@@ -2,6 +2,7 @@ import { Webhook } from "svix";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { sendWelcomeEmail } from "@/lib/email";
 
 // Syncs Clerk users into the Supabase `profiles` table.
 // Configure in Clerk Dashboard -> Webhooks -> endpoint: /api/webhooks/clerk
@@ -63,6 +64,11 @@ export async function POST(req: Request) {
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
+      // Send the welcome email. sendWelcomeEmail is a no-op (with log) if
+      // RESEND_API_KEY isn't set, and it catches its own errors — so a
+      // misconfigured email provider can never break the webhook.
+      const primaryEmail = data.email_addresses?.[0]?.email_address ?? null;
+      await sendWelcomeEmail(primaryEmail, displayName);
     } else {
       // user.updated: refresh mutable fields only. Never rewrite `handle` — a
       // later Clerk username change must not move the profile URL or collide.

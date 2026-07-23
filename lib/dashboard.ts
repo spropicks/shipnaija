@@ -24,6 +24,8 @@ export type DashboardData = {
   recentLogs: FeedLog[];
   activeChallenge: Challenge | null;
   enteredChallenge: boolean;
+  // Lightweight activation signals for the dashboard onboarding checklist.
+  viewerStats: { projectCount: number; logCount: number; hasEngaged: boolean };
 };
 
 function utcDay(iso: string): string {
@@ -67,37 +69,49 @@ export async function getDashboardData(me: Profile): Promise<DashboardData> {
   const log7Ids = logs7.map((l) => l.id);
 
   // Engagement received on my last-7d logs + challenge entry check
-  const [likesRes, commentsRes, entryRes, myProjectLogs7Res] = await Promise.all([
-    log7Ids.length
-      ? supabase
-          .from("likes")
-          .select("id", { count: "exact", head: true })
-          .eq("target_type", "build_log")
-          .in("target_id", log7Ids)
-      : Promise.resolve({ count: 0 }),
-    log7Ids.length
-      ? supabase
-          .from("comments")
-          .select("id", { count: "exact", head: true })
-          .eq("target_type", "build_log")
-          .in("target_id", log7Ids)
-      : Promise.resolve({ count: 0 }),
-    activeChallenge
-      ? supabase
-          .from("challenge_entries")
-          .select("id")
-          .eq("challenge_id", activeChallenge.id)
-          .eq("builder_id", me.id)
-          .maybeSingle()
-      : Promise.resolve({ data: null }),
-    projects.length
-      ? supabase
-          .from("build_logs")
-          .select("id, project_id")
-          .in("project_id", projects.map((p) => p.id))
-          .gte("created_at", since7d)
-      : Promise.resolve({ data: [] as { id: string; project_id: string }[] }),
-  ]);
+  const [likesRes, commentsRes, entryRes, myProjectLogs7Res, myLikesRes, myCommentsRes] =
+    await Promise.all([
+      log7Ids.length
+        ? supabase
+            .from("likes")
+            .select("id", { count: "exact", head: true })
+            .eq("target_type", "build_log")
+            .in("target_id", log7Ids)
+        : Promise.resolve({ count: 0 }),
+      log7Ids.length
+        ? supabase
+            .from("comments")
+            .select("id", { count: "exact", head: true })
+            .eq("target_type", "build_log")
+            .in("target_id", log7Ids)
+        : Promise.resolve({ count: 0 }),
+      activeChallenge
+        ? supabase
+            .from("challenge_entries")
+            .select("id")
+            .eq("challenge_id", activeChallenge.id)
+            .eq("builder_id", me.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      projects.length
+        ? supabase
+            .from("build_logs")
+            .select("id, project_id")
+            .in("project_id", projects.map((p) => p.id))
+            .gte("created_at", since7d)
+        : Promise.resolve({ data: [] as { id: string; project_id: string }[] }),
+      // Activation: has the viewer liked or commented on anyone else's work?
+      supabase
+        .from("likes")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", me.id)
+        .limit(1),
+      supabase
+        .from("comments")
+        .select("id", { count: "exact", head: true })
+        .eq("author_id", me.id)
+        .limit(1),
+    ]);
 
   // Activity strip: last 14 UTC days, oldest → newest
   const perDay = new Map<string, number>();
@@ -178,5 +192,10 @@ export async function getDashboardData(me: Profile): Promise<DashboardData> {
     recentLogs,
     activeChallenge,
     enteredChallenge: Boolean(entryRes.data),
+    viewerStats: {
+      projectCount: projects.length,
+      logCount: logs14.length,
+      hasEngaged: (myLikesRes.count ?? 0) > 0 || (myCommentsRes.count ?? 0) > 0,
+    },
   };
 }

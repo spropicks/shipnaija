@@ -4,26 +4,7 @@ import { useActionState, useState } from "react";
 import { completeOnboarding, skipOnboarding } from "@/app/actions/profile";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { IDLE_STATE } from "@/lib/action-state";
-
-// Curated quick-pick tech stack. Reused from profile-edit later if desired.
-const STACK_PILLS: { category: string; tags: string[] }[] = [
-  {
-    category: "Frontend",
-    tags: ["TypeScript", "JavaScript", "Next.js", "React", "Vue", "Svelte", "Tailwind"],
-  },
-  {
-    category: "Backend",
-    tags: ["Node.js", "Python", "Go", "Rust", "PHP", "Laravel"],
-  },
-  {
-    category: "Mobile",
-    tags: ["React Native", "Flutter", "Swift", "Kotlin"],
-  },
-  {
-    category: "Infra / Data",
-    tags: ["Postgres", "Supabase", "Firebase", "AWS", "Vercel", "Docker", "GraphQL"],
-  },
-];
+import { TECH_STACK_PILLS, mergeStack } from "@/lib/tech-stack";
 
 const inputCls =
   "w-full rounded-md border border-white/15 bg-white/[0.04] px-3 py-2 text-sm outline-none focus:border-green-500";
@@ -41,29 +22,39 @@ export function OnboardingForm({
   defaultStack?: string[];
 }) {
   const [state, formAction] = useActionState(completeOnboarding, IDLE_STATE);
-  const [picked, setPicked] = useState<Set<string>>(
-    () => new Set(defaultStack.map((s) => s.toLowerCase()))
+  // Track the *canonical* (cased) form of each picked tag so we submit the
+  // right casing rather than the lowercased lookup key.
+  const [picked, setPicked] = useState<string[]>(() => {
+    // Drop the defaultStack values that aren't in the curated list (free-form
+    // entries) — they aren't pills, so they don't need to be in `picked`.
+    const inPills = new Set(
+      TECH_STACK_PILLS.flatMap((g) => g.tags.map((t) => t.toLowerCase()))
+    );
+    return defaultStack.filter((t) => inPills.has(t.toLowerCase()));
+  });
+  const [stackInput, setStackInput] = useState(
+    // Pre-fill the free-text input with any defaultStack tags that aren't pills
+    // so the user sees their existing custom stack.
+    defaultStack
+      .filter(
+        (t) =>
+          !TECH_STACK_PILLS.flatMap((g) => g.tags)
+            .map((p) => p.toLowerCase())
+            .includes(t.toLowerCase())
+      )
+      .join(", ")
   );
-  const [stackInput, setStackInput] = useState("");
 
   function toggle(tag: string) {
     setPicked((prev) => {
-      const next = new Set(prev);
       const k = tag.toLowerCase();
-      if (next.has(k)) next.delete(k);
-      else next.add(k);
-      return next;
+      const idx = prev.findIndex((p) => p.toLowerCase() === k);
+      if (idx >= 0) return prev.filter((_, i) => i !== idx);
+      return [...prev, tag];
     });
   }
 
-  // Merge picked pills + free-text, deduped (case-insensitive), capped at 12.
-  const mergedStack = (() => {
-    const all = new Set(picked);
-    for (const t of stackInput.split(",").map((s) => s.trim()).filter(Boolean)) {
-      all.add(t.toLowerCase());
-    }
-    return Array.from(all).slice(0, 12);
-  })();
+  const mergedStack = mergeStack(picked, stackInput);
 
   return (
     <form action={formAction} className="mt-10 flex flex-col gap-10">
@@ -122,12 +113,12 @@ export function OnboardingForm({
           Pick a few quick tags. You can add custom ones below.
         </p>
         <div className="mt-4 flex flex-col gap-3">
-          {STACK_PILLS.map((group) => (
+          {TECH_STACK_PILLS.map((group) => (
             <div key={group.category}>
               <p className="text-xs font-medium text-white/40">{group.category}</p>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {group.tags.map((tag) => {
-                  const on = picked.has(tag.toLowerCase());
+                  const on = picked.some((p) => p.toLowerCase() === tag.toLowerCase());
                   return (
                     <button
                       type="button"

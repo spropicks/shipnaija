@@ -5,6 +5,7 @@ import { MobileDashboard } from "@/components/mobile-dashboard";
 import { DesktopDashboard } from "@/components/desktop-dashboard";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { OnboardingBanner } from "@/components/ui/onboarding-banner";
+import { OnboardingChecklist } from "@/components/onboarding-checklist";
 import { getCurrentProfile } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard";
 
@@ -50,13 +51,32 @@ export default async function DashboardPage() {
 
   const data = await getDashboardData(me);
 
+  // Checklist is shown as long as at least one of the 4 activation steps
+  // is still incomplete. The dedicated welcome banner is layered above it
+  // for users who haven't even filled their profile yet.
+  const checklistDone =
+    me.onboarded_at !== null &&
+    data.viewerStats.projectCount > 0 &&
+    data.viewerStats.logCount > 0 &&
+    data.viewerStats.hasEngaged;
+  const showChecklist = !checklistDone;
+  const showBanner = me.onboarded_at === null;
+
   return (
     <main className="min-h-screen">
       <SiteHeader />
       <SignedIn>
-        {me.onboarded_at === null ? (
-          <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
-            <OnboardingBanner />
+        {showBanner || showChecklist ? (
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 pt-4 sm:px-6">
+            {showBanner ? <OnboardingBanner /> : null}
+            {showChecklist ? (
+              <OnboardingChecklist
+                profile={me}
+                projectCount={data.viewerStats.projectCount}
+                logCount={data.viewerStats.logCount}
+                hasEngaged={data.viewerStats.hasEngaged}
+              />
+            ) : null}
           </div>
         ) : null}
       </SignedIn>
