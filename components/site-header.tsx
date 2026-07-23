@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { getCurrentProfile } from "@/lib/auth";
+import { LogoMark } from "@/components/logo";
 
 const NAV_LINKS = [
   { href: "/feed", label: "Feed" },
@@ -13,9 +14,9 @@ const NAV_LINKS = [
 function Brand() {
   return (
     <Link href="/" className="group flex shrink-0 items-center gap-2.5" aria-label="ShipNaija home">
-      <span className="relative grid size-8 place-items-center overflow-hidden rounded-[10px] border border-green-400/20 bg-green-400/[0.08] text-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors group-hover:border-green-400/40">
+      <span className="relative grid size-8 place-items-center overflow-hidden rounded-[10px] border border-green-400/20 bg-green-400/[0.08] text-green-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors group-hover:border-green-400/40">
         <span className="absolute inset-x-1 bottom-0 h-px bg-gradient-to-r from-transparent via-green-400 to-transparent" />
-        🚢
+        <LogoMark className="size-5" />
       </span>
       <span className="text-[15px] font-semibold tracking-[-0.02em] text-white">
         ShipNaija<span className="text-green-400">.</span>

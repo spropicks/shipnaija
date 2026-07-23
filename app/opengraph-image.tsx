@@ -4,6 +4,9 @@ export const alt = "ShipNaija.dev — Build in public, Naija style";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+const LOGO_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='#16a34a'/><g fill='none' stroke='#ffffff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'><path d='M27 22 L19 32 L27 42'/><path d='M37 22 L45 32 L37 42'/><path d='M34 20 L30 44'/><path d='M13 51 q6 5 12 0 t12 0 t12 0'/></g></svg>`;
+const LOGO_SRC = `data:image/svg+xml;utf8,${encodeURIComponent(LOGO_SVG)}`;
+
 export default function Image() {
   return new ImageResponse(
     (
@@ -22,6 +25,8 @@ export default function Image() {
           fontSize: 72,
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img width={140} height={140} src={LOGO_SRC} alt="" style={{ marginBottom: 32 }} />
         <div style={{ display: "flex", alignItems: "baseline" }}>
           <span style={{ fontWeight: 700 }}>Ship</span>
           <span style={{ fontWeight: 700, color: "#22c55e" }}>Naija</span>
