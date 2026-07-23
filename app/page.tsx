@@ -592,7 +592,7 @@ export default async function Home() {
           <div>
             <Link href="/" className="flex items-center gap-2.5 text-sm font-semibold">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="ShipNaija" width={32} height={32} className="size-8 shrink-0 object-contain" />
+              <img src="/logo.webp" alt="ShipNaija" width={36} height={36} className="size-9 shrink-0 object-contain" />
               ShipNaija<span className="-ml-2 text-green-400">.</span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-6 text-white/32">

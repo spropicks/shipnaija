@@ -12,18 +12,15 @@ const NAV_LINKS = [
 
 function Brand() {
   return (
-    <Link href="/" className="group flex shrink-0 items-center gap-2.5" aria-label="ShipNaija home">
+    <Link href="/" className="group flex shrink-0 items-center" aria-label="ShipNaija home">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo.png"
+        src="/logo.webp"
         alt="ShipNaija"
-        width={32}
-        height={32}
-        className="size-8 shrink-0 object-contain transition-transform group-hover:scale-105"
+        width={44}
+        height={44}
+        className="size-11 shrink-0 object-contain transition-transform group-hover:scale-105"
       />
-      <span className="text-[15px] font-semibold tracking-[-0.02em] text-white">
-        ShipNaija<span className="text-green-400">.</span>
-      </span>
     </Link>
   );
 }
