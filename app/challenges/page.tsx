@@ -17,8 +17,10 @@ export const metadata = { title: "Challenges" };
 export default async function ChallengesPage() {
   const [active, all] = await Promise.all([getActiveChallenge(), listChallenges()]);
   const now = new Date().toISOString();
+  const upcoming = all
+    .filter((c) => c.id !== active?.id && c.starts_at > now)
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   // "Past" = anything that has ended and isn't the currently-active one.
-  // Future/upcoming challenges are intentionally not listed here.
   const past = all.filter((c) => c.id !== active?.id && c.ends_at < now);
 
   return (
@@ -42,7 +44,7 @@ export default async function ChallengesPage() {
             <p className="mt-2 text-2xl font-bold">{active.title}</p>
             {active.theme ? <p className="mt-1 text-white/70">{active.theme}</p> : null}
             <p className="mt-4 text-sm font-medium text-green-400">
-              Enter your project → 
+              Enter your project →
             </p>
           </Link>
         ) : (
@@ -50,6 +52,29 @@ export default async function ChallengesPage() {
             No live challenge right now — the next one drops soon. 👀
           </div>
         )}
+
+        {upcoming.length > 0 ? (
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold">Upcoming</h2>
+            <ul className="mt-4 flex flex-col gap-2">
+              {upcoming.map((c) => (
+                <li key={c.id}>
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{c.title}</p>
+                      {c.theme ? (
+                        <p className="truncate text-xs text-white/45">{c.theme}</p>
+                      ) : null}
+                    </div>
+                    <span className="shrink-0 rounded-full border border-white/10 px-2.5 py-1 text-xs text-white/50">
+                      {fmtRange(c.starts_at, c.ends_at)}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {past.length > 0 ? (
           <div className="mt-12">
@@ -59,10 +84,10 @@ export default async function ChallengesPage() {
                 <li key={c.id}>
                   <Link
                     href={`/challenges/${c.slug}`}
-                    className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-green-500/40"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-green-500/40"
                   >
-                    <span className="text-sm font-medium">{c.title}</span>
-                    <span className="text-xs text-white/50">{fmtRange(c.starts_at, c.ends_at)}</span>
+                    <span className="truncate text-sm font-medium">{c.title}</span>
+                    <span className="shrink-0 text-xs text-white/50">{fmtRange(c.starts_at, c.ends_at)}</span>
                   </Link>
                 </li>
               ))}

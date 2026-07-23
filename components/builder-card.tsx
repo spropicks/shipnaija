@@ -18,12 +18,6 @@ export function BuilderCard({ profile }: { profile: Profile }) {
       {profile.bio ? (
         <p className="line-clamp-2 text-sm text-white/70">{profile.bio}</p>
       ) : null}
-      <div className="mt-auto flex flex-wrap items-center gap-2 text-xs text-white/50">
-        {profile.location ? <span>📍 {profile.location}</span> : null}
-        {profile.current_streak > 0 ? (
-          <span className="text-orange-400">🔥 {profile.current_streak}-day streak</span>
-        ) : null}
-      </div>
       {profile.tech_stack?.length ? (
         <div className="flex flex-wrap gap-1.5">
           {profile.tech_stack.slice(0, 5).map((t) => (
@@ -36,6 +30,17 @@ export function BuilderCard({ profile }: { profile: Profile }) {
           ))}
         </div>
       ) : null}
+      <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs text-white/50">
+        {profile.location ? <span>📍 {profile.location}</span> : null}
+        {profile.current_streak > 0 ? (
+          <span className="text-orange-400">🔥 {profile.current_streak}-day streak</span>
+        ) : null}
+        {profile.project_count !== undefined ? (
+          <span className="tabular-nums">
+            🗂 {profile.project_count} · 📝 {profile.log_count ?? 0}
+          </span>
+        ) : null}
+      </div>
     </Link>
   );
 }

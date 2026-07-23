@@ -38,11 +38,20 @@ export function ProjectCard({ project }: { project: Project }) {
           ))}
         </div>
       ) : null}
-      {project.owner ? (
-        <p className="mt-auto text-xs text-white/50">
-          by <span className="text-white/70">@{project.owner.handle}</span>
-        </p>
-      ) : null}
+      <div className="mt-auto flex items-center justify-between gap-2 pt-1 text-xs text-white/45">
+        {project.owner ? (
+          <span className="truncate">
+            by <span className="text-white/70">@{project.owner.handle}</span>
+          </span>
+        ) : (
+          <span />
+        )}
+        {project.log_count !== undefined ? (
+          <span className="shrink-0 tabular-nums">
+            📝 {project.log_count} · 💚 {project.like_count ?? 0}
+          </span>
+        ) : null}
+      </div>
     </Link>
   );
 }
