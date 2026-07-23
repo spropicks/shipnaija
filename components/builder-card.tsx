@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Avatar } from "@/components/ui/avatar";
 import type { Profile } from "@/lib/auth";
 
 export function BuilderCard({ profile }: { profile: Profile }) {
@@ -8,18 +9,7 @@ export function BuilderCard({ profile }: { profile: Profile }) {
       className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-green-500/50 hover:bg-white/[0.05]"
     >
       <div className="flex items-center gap-3">
-        {profile.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.avatar_url}
-            alt={profile.display_name}
-            className="h-12 w-12 rounded-full object-cover"
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600/30 font-bold text-green-400">
-            {profile.display_name.slice(0, 1).toUpperCase()}
-          </div>
-        )}
+        <Avatar src={profile.avatar_url} name={profile.display_name} size={48} />
         <div className="min-w-0">
           <p className="truncate font-semibold">{profile.display_name}</p>
           <p className="truncate text-sm text-white/50">@{profile.handle}</p>

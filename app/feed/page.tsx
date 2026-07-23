@@ -1,9 +1,12 @@
 import { SiteHeader } from "@/components/site-header";
 import { LogComposer } from "@/components/log-composer";
 import { BuildLogCard } from "@/components/build-log-card";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { getCurrentProfile } from "@/lib/auth";
 import { listFeed } from "@/lib/feed";
 import { listProjectsByOwner } from "@/lib/queries";
+import { Rss } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -21,8 +24,11 @@ export default async function FeedPage() {
     <main className="min-h-screen">
       <SiteHeader />
       <section className="mx-auto max-w-2xl px-6 py-10">
-        <h1 className="text-3xl font-bold">The Feed</h1>
-        <p className="mt-1 text-white/60">What Naija builders shipped today.</p>
+        <PageHeader
+          eyebrow="Today on ShipNaija"
+          title="The Feed"
+          subtitle="What Naija builders shipped today."
+        />
 
         <div className="mt-8 flex flex-col gap-6">
           {me ? (
@@ -39,9 +45,13 @@ export default async function FeedPage() {
           ) : null}
 
           {logs.length === 0 ? (
-            <div className="py-16 text-center text-white/50">
-              No build logs yet. Be the first to ship something! 🚢
-            </div>
+            <EmptyState
+              icon={Rss}
+              title="No build logs yet"
+              description="Be the first to ship something and start the conversation."
+              actionHref={me ? "/projects/new" : undefined}
+              actionLabel={me ? "Add your project" : undefined}
+            />
           ) : (
             logs.map((log) => (
               <BuildLogCard

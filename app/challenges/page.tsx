@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { PageHeader } from "@/components/ui/page-header";
 import { getActiveChallenge, listChallenges } from "@/lib/challenges";
 
 export const dynamic = "force-dynamic";
@@ -24,10 +25,11 @@ export default async function ChallengesPage() {
     <main className="min-h-screen">
       <SiteHeader />
       <section className="mx-auto max-w-3xl px-6 py-10">
-        <h1 className="text-3xl font-bold">Weekly Ship Challenges</h1>
-        <p className="mt-1 text-white/60">
-          One week. One theme. Ship something and show the community.
-        </p>
+        <PageHeader
+          eyebrow="Ship week"
+          title="Weekly Ship Challenges"
+          subtitle="One week. One theme. Ship something and show the community."
+        />
 
         {active ? (
           <Link

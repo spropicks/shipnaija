@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { PageHeader } from "@/components/ui/page-header";
+import { Avatar } from "@/components/ui/avatar";
 import { getTrending } from "@/lib/trending";
 
 export const dynamic = "force-dynamic";
@@ -15,10 +17,11 @@ export default async function TrendingPage() {
     <main className="min-h-screen">
       <SiteHeader />
       <section className="mx-auto max-w-5xl px-6 py-10">
-        <h1 className="text-3xl font-bold">Trending</h1>
-        <p className="mt-1 text-white/60">
-          Who&apos;s shipping the hardest this week? Ranked by build logs, likes and streaks over the last 7 days.
-        </p>
+        <PageHeader
+          eyebrow="This week"
+          title="Trending"
+          subtitle="Who's shipping the hardest this week? Ranked by build logs, likes and streaks over the last 7 days."
+        />
 
         <div className="mt-10 grid gap-10 md:grid-cols-2">
           <div>
@@ -38,14 +41,7 @@ export default async function TrendingPage() {
                       <span className="w-7 shrink-0 text-center text-sm text-white/50">
                         {MEDALS[i] ?? `#${i + 1}`}
                       </span>
-                      {b.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={b.avatar_url} alt="" className="h-8 w-8 rounded-full border border-white/10" />
-                      ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600/30 text-xs font-bold text-green-400">
-                          {b.display_name.slice(0, 1).toUpperCase()}
-                        </div>
-                      )}
+                      <Avatar src={b.avatar_url} name={b.display_name} size={32} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{b.display_name}</p>
                         <p className="truncate text-xs text-white/50">@{b.handle}</p>

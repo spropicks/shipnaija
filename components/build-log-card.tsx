@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LikeButton } from "@/components/like-button";
+import { Avatar } from "@/components/ui/avatar";
 import { deleteBuildLog } from "@/app/actions/build-logs";
 import { safeExternalUrl } from "@/lib/utils";
 import type { FeedLog } from "@/lib/feed";
@@ -33,18 +34,7 @@ export function BuildLogCard({
   return (
     <article className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
       <div className="flex min-w-0 items-center gap-3">
-        {log.author.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={log.author.avatar_url}
-            alt=""
-            className="size-9 shrink-0 rounded-full border border-white/10"
-          />
-        ) : (
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm">
-            {log.author.display_name.slice(0, 1)}
-          </div>
-        )}
+        <Avatar src={log.author.avatar_url} name={log.author.display_name} size={36} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm">
             <Link href={`/builders/${log.author.handle}`} className="font-medium hover:text-green-400">
