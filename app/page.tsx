@@ -591,7 +591,8 @@ export default async function Home() {
         <div className="mx-auto grid max-w-6xl gap-12 px-5 py-14 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <Link href="/" className="flex items-center gap-2.5 text-sm font-semibold">
-              <span className="grid size-8 place-items-center rounded-[10px] border border-green-400/20 bg-green-400/[0.07]">🚢</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="ShipNaija" width={32} height={32} className="size-8 shrink-0 object-contain" />
               ShipNaija<span className="-ml-2 text-green-400">.</span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-6 text-white/32">
