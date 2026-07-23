@@ -1,9 +1,10 @@
 import { Activity, ArrowRight } from "lucide-react";
-import { SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { SiteHeader } from "@/components/site-header";
 import { MobileDashboard } from "@/components/mobile-dashboard";
 import { DesktopDashboard } from "@/components/desktop-dashboard";
 import { BlurFade } from "@/components/magicui/blur-fade";
+import { OnboardingBanner } from "@/components/ui/onboarding-banner";
 import { getCurrentProfile } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard";
 
@@ -52,6 +53,13 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen">
       <SiteHeader />
+      <SignedIn>
+        {me.onboarded_at === null ? (
+          <div className="mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6">
+            <OnboardingBanner />
+          </div>
+        ) : null}
+      </SignedIn>
       <MobileDashboard me={me} data={data} />
       <DesktopDashboard me={me} data={data} />
     </main>

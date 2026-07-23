@@ -1,40 +1,36 @@
 import { redirect } from "next/navigation";
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { SiteHeader } from "@/components/site-header";
+import { auth } from "@clerk/nextjs/server";
+import { PageHeader } from "@/components/ui/page-header";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { getCurrentProfile } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Finish setting up" };
+export const metadata = { title: "Welcome to ShipNaija" };
 
 export default async function OnboardingPage() {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
-  // getCurrentProfile self-heals, so in the common case a profile already
-  // exists (or is created here) and we send the user straight to their
-  // dashboard. We only render the claim form when the automatic path failed.
   const profile = await getCurrentProfile();
-  if (profile) redirect("/dashboard");
+  if (!profile) redirect("/onboarding");
 
-  const user = await currentUser();
-  const defaultHandle = (user?.username || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]/g, "")
-    .slice(0, 30);
-  const defaultName =
-    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.username || "";
+  // Already onboarded (or has a meaningful profile) — skip past this page.
+  // The self-heal path's claimProfile stamps onboarded_at, so users in the
+  // handle-collision flow land on the dashboard instead of looping.
+  if (profile.onboarded_at) redirect("/dashboard");
 
   return (
     <main className="min-h-screen">
-      <SiteHeader />
-      <section className="mx-auto max-w-md px-6 py-14">
-        <h1 className="text-3xl font-bold">Finish setting up</h1>
-        <p className="mt-2 text-white/60">
-          Pick a handle to claim your builder profile. You can change your display name
-          and the rest later.
-        </p>
-        <OnboardingForm defaultHandle={defaultHandle} defaultName={defaultName} />
+      <section className="mx-auto max-w-2xl px-6 py-14">
+        <PageHeader
+          eyebrow="Welcome to ShipNaija 🚢"
+          title="Let's set up your builder profile"
+          subtitle="Tell the community who you are and what you build. Everything is optional — you can always update later from your profile."
+        />
+        <OnboardingForm
+          defaultName={profile.display_name !== "Builder" ? profile.display_name : ""}
+          defaultStack={profile.tech_stack ?? []}
+        />
       </section>
     </main>
   );

@@ -18,6 +18,7 @@ export type Profile = {
   longest_streak: number;
   last_log_date: string | null;
   created_at: string;
+  onboarded_at: string | null;
   // Optional aggregates populated by listBuilders (undefined elsewhere).
   project_count?: number;
   log_count?: number;

@@ -77,12 +77,21 @@ export async function SiteHeader() {
                 @{profile.handle}
               </Link>
             ) : null}
-            <Link
-              href="/projects/new"
-              className="rounded-[10px] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-green-100"
-            >
-              + New project
-            </Link>
+            {profile?.onboarded_at === null ? (
+              <Link
+                href="/onboarding"
+                className="rounded-[10px] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-green-100"
+              >
+                Complete setup
+              </Link>
+            ) : (
+              <Link
+                href="/projects/new"
+                className="rounded-[10px] bg-white px-4 py-2 text-[13px] font-semibold text-black transition-colors hover:bg-green-100"
+              >
+                + New project
+              </Link>
+            )}
             <UserButton />
           </SignedIn>
         </div>
@@ -132,9 +141,15 @@ export async function SiteHeader() {
                     @{profile.handle}
                   </Link>
                 ) : null}
-                <Link href="/projects/new" className="mt-1 rounded-xl bg-white px-3 py-2.5 text-center font-semibold text-black">
-                  + New project
-                </Link>
+                {profile?.onboarded_at === null ? (
+                  <Link href="/onboarding" className="mt-1 rounded-xl bg-white px-3 py-2.5 text-center font-semibold text-black">
+                    Complete setup
+                  </Link>
+                ) : (
+                  <Link href="/projects/new" className="mt-1 rounded-xl bg-white px-3 py-2.5 text-center font-semibold text-black">
+                    + New project
+                  </Link>
+                )}
               </SignedIn>
             </nav>
           </details>

@@ -38,6 +38,9 @@ export async function updateProfile(formData: FormData) {
       twitter_url: String(formData.get("twitter_url") ?? "").trim() || null,
       github_url: String(formData.get("github_url") ?? "").trim() || null,
       website_url: String(formData.get("website_url") ?? "").trim() || null,
+      // Anyone who meaningfully edits their profile is considered onboarded.
+      // Drives the welcome banner + header "Complete setup" CTA.
+      onboarded_at: new Date().toISOString(),
     })
     .eq("id", profile.id);
 
@@ -45,7 +48,57 @@ export async function updateProfile(formData: FormData) {
 
   revalidatePath("/builders");
   revalidatePath(`/builders/${profile.handle}`);
+  revalidatePath("/dashboard");
   redirect(`/builders/${profile.handle}`);
+}
+
+// Like updateProfile, but for the first-run /onboarding flow. Saves the
+// profile, stamps onboarded_at, and routes the user to /projects/new so the
+// activation loop continues (profile → first project → first build log).
+export async function completeOnboarding(
+  _prevState: ActionState,
+  formData: FormData
+): Promise<ActionState> {
+  const profile = await getCurrentProfile();
+  if (!profile) return { ok: false, message: "Sign in to set up your profile." };
+
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      display_name: String(formData.get("display_name") ?? "").trim() || profile.display_name,
+      bio: String(formData.get("bio") ?? "").trim() || null,
+      location: String(formData.get("location") ?? "").trim() || null,
+      tech_stack: parseStack(formData.get("tech_stack")),
+      twitter_url: String(formData.get("twitter_url") ?? "").trim() || null,
+      github_url: String(formData.get("github_url") ?? "").trim() || null,
+      website_url: String(formData.get("website_url") ?? "").trim() || null,
+      onboarded_at: new Date().toISOString(),
+    })
+    .eq("id", profile.id);
+
+  if (error) return { ok: false, message: "Couldn't save your profile. Try again." };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/onboarding");
+  redirect("/projects/new");
+}
+
+// Stamp onboarded_at without touching any other fields. Used by the
+// "Skip for now" CTA on the welcome banner and the onboarding page.
+export async function skipOnboarding() {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/");
+
+  const supabase = createServiceClient();
+  await supabase
+    .from("profiles")
+    .update({ onboarded_at: new Date().toISOString() })
+    .eq("id", profile.id);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/onboarding");
+  redirect("/dashboard");
 }
 
 // Onboarding fallback: creates a profile for a signed-in Clerk user whose
@@ -92,6 +145,7 @@ export async function claimProfile(
       handle,
       display_name: displayName,
       avatar_url: user.imageUrl ?? null,
+      onboarded_at: new Date().toISOString(),
     },
     { onConflict: "clerk_user_id" }
   );
