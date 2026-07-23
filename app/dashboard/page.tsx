@@ -1,6 +1,5 @@
 import { Activity, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedOut, SignInButton } from "@clerk/nextjs";
 import { SiteHeader } from "@/components/site-header";
 import { MobileDashboard } from "@/components/mobile-dashboard";
 import { DesktopDashboard } from "@/components/desktop-dashboard";
@@ -42,16 +41,6 @@ export default async function DashboardPage() {
                 </button>
               </SignInButton>
             </SignedOut>
-            <SignedIn>
-              {/* Signed in but no profile row yet — finish onboarding. */}
-              <Link
-                href="/onboarding"
-                className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-green-100"
-              >
-                Finish setting up your profile
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </SignedIn>
           </BlurFade>
         </section>
       </main>
@@ -62,9 +51,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen">
-      <div className="lg:hidden">
-        <SiteHeader />
-      </div>
+      <SiteHeader />
       <MobileDashboard me={me} data={data} />
       <DesktopDashboard me={me} data={data} />
     </main>
